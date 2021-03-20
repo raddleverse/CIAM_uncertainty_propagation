@@ -17,7 +17,8 @@ using Mimi
 
     # --- Region / segment mapping ---
     segID = Parameter( index = [segments])   # Unique segment numeric identifier 
-    xsc = Parameter{Dict{Int32, Tuple{Int32, Bool, Bool}}}()  # Region to segment mapping (dictionary) to keep track of which segments belong to each region    # TWmod
+    #xsc = Parameter{Dict{Int32, Tuple{Int32, Bool, Bool}}}()  # Region to segment mapping (dictionary) to keep track of which segments belong to each region    # TWmod
+    xsc = Parameter{Dict{Any, Any}}()  # Region to segment mapping (dictionary) to keep track of which segments belong to each region    # TWmod
     rcp = Parameter{Int}()                   # RCP being run (metadata; not used in run)
     percentile = Parameter{Int}()            # Percentile of RCP being run (metadata; not used in run)
     ssp = Parameter{Int}()                   # SSP being used (0 for base case)
@@ -212,7 +213,8 @@ using Mimi
     OptimalRelocate = Variable(index = [time, segments])
     
 
-    function run_timestep(p, v, d, t)    
+    function run_timestep(p, v, d, t)   
+        println(gettime(t))
         # In first period, initialize all non-adaptation dependent intermediate variables for all timesteps
         if is_first(t)
           #  1. Initialize non-region dependent intermediate variables
@@ -246,7 +248,7 @@ using Mimi
             # 3. Initialize segment-dependent variables 
             for m in d.segments
                 rgn_ind = getregion(m, p.xsc) # Identify the region the segment belongs to
-     
+                
                 # Initialize first-period population density, coast area and surge parameters
                 if p.popinput==0    
                     v.popdens_seg[t,m] = p.popdens[m]
@@ -260,7 +262,7 @@ using Mimi
                 # Greenland segments are treated differently 
                 if isgreenland(m,p.xsc)==1
                     v.ypc_seg[t,m] =22642*1.01^1   # FLAG: assumes t is an index (1-20)
-                    v.vsl[t,m] = 1e-6 * p.vslmult * p.ypcc[TimestepIndex(1),p.rgn_ind_usa] * (v.ypc_seg[t,m]/p.ypcc[TimestepIndex(1),p.rgn_ind_usa])^p.vslel
+                    v.vsl[t,m] = 1e-6 * p.vslmult * p.ypcc[TimestepIndex(1),p.rgn_ind_usa] * (v.ypc_seg[t,m]/p.ypcc[1,p.rgn_ind_usa])^p.vslel
                     v.coastland[t,m] = (v.land_appr[TimestepIndex(1),p.rgn_ind_canada] * v.landdata[p.rgn_ind_canada]) * max(0.5, log(1+v.popdens_seg[t,m])/log(25))
                     v.landvalue[t,m] = min(v.coastland[t,m], (v.land_appr[TimestepIndex(1),p.rgn_ind_canada] * v.landdata[p.rgn_ind_canada]))
                 else
@@ -275,35 +277,35 @@ using Mimi
                 
                 for i in 2:Int(p.ntsteps)  
                     if p.popinput==0      
-                        v.popdens_seg[i,m] = v.popdens_seg[i-1,m] * (1 + growthrate(p.pop[i-1,rgn_ind], p.pop[i,rgn_ind])) 
+                        v.popdens_seg[TimestepIndex(i),m] = v.popdens_seg[TimestepIndex(i-1),m] * (1 + growthrate(p.pop[TimestepIndex(i-1),rgn_ind], p.pop[TimestepIndex(i),rgn_ind])) 
                     elseif p.popinput==1
-                        v.popdens_seg[i,m]=p.popdens_seg_jones[i,m]
+                        v.popdens_seg[TimestepIndex(i),m]=p.popdens_seg_jones[TimestepIndex(i),m]
                     elseif p.popinput==2
-                        v.popdens_seg[i,m]=p.popdens_seg_merkens[i,m]
+                        v.popdens_seg[TimestepIndex(i),m]=p.popdens_seg_merkens[TimestepIndex(i),m]
                     end
      
                     # Special treatment for Greenland segments 
                     if isgreenland(m,p.xsc)==1
-                        v.ypc_seg[i,m] =22642*1.01^i   # FLAG: assumes i is an index (1-20)
-                        v.vsl[i,m] = 1e-6 * p.vslmult * p.ypcc[i,p.rgn_ind_usa] * (v.ypc_seg[i,m]/p.ypcc[i,p.rgn_ind_usa])^p.vslel 
-                        v.coastland[i,m] = (v.land_appr[i,p.rgn_ind_canada] * v.landdata[p.rgn_ind_canada]) * max(0.5, log(1+v.popdens_seg[i,m])/log(25))
-                        v.landvalue[i,m] = min(v.coastland[i,m], (v.land_appr[i,p.rgn_ind_canada] * v.landdata[p.rgn_ind_canada]))
+                        v.ypc_seg[TimestepIndex(i),m] =22642*1.01^i   # FLAG: assumes i is an index (1-20)
+                        v.vsl[TimestepIndex(i),m] = 1e-6 * p.vslmult * p.ypcc[TimestepIndex(i),p.rgn_ind_usa] * (v.ypc_seg[TimestepIndex(i),m]/p.ypcc[TimestepIndex(i),p.rgn_ind_usa])^p.vslel 
+                        v.coastland[TimestepIndex(i),m] = (v.land_appr[TimestepIndex(i),p.rgn_ind_canada] * v.landdata[p.rgn_ind_canada]) * max(0.5, log(1+v.popdens_seg[TimestepIndex(i),m])/log(25))
+                        v.landvalue[TimestepIndex(i),m] = min(v.coastland[TimestepIndex(i),m], (v.land_appr[TimestepIndex(i),p.rgn_ind_canada] * v.landdata[p.rgn_ind_canada]))
     
                     else
-                        v.ypc_seg[i,m] = p.ypcc[i,rgn_ind] * max(0.9, (v.popdens_seg[1,m]/250.)^0.05) # ypcc * popdens scaling factor
-                        v.coastland[i,m] = max(0.5, log(1+v.popdens_seg[i,m])/log(25)) * (v.land_appr[i,rgn_ind] * v.landdata[rgn_ind])
-                        v.vsl[i,m] = 1e-6 * p.vslmult * p.ypcc[i,p.rgn_ind_usa] * (p.ypcc[i,rgn_ind]/p.ypcc[i,p.rgn_ind_usa])^p.vslel  
-                        v.landvalue[i,m] = min(v.coastland[i,m], (v.land_appr[i,rgn_ind] * v.landdata[rgn_ind]))
+                        v.ypc_seg[TimestepIndex(i),m] = p.ypcc[TimestepIndex(i),rgn_ind] * max(0.9, (v.popdens_seg[TimestepIndex(1),m]/250.)^0.05) # ypcc * popdens scaling factor
+                        v.coastland[TimestepIndex(i),m] = max(0.5, log(1+v.popdens_seg[TimestepIndex(i),m])/log(25)) * (v.land_appr[TimestepIndex(i),rgn_ind] * v.landdata[rgn_ind])
+                        v.vsl[TimestepIndex(i),m] = 1e-6 * p.vslmult * p.ypcc[TimestepIndex(i),p.rgn_ind_usa] * (p.ypcc[TimestepIndex(i),rgn_ind]/p.ypcc[TimestepIndex(i),p.rgn_ind_usa])^p.vslel  
+                        v.landvalue[TimestepIndex(i),m] = min(v.coastland[TimestepIndex(i),m], (v.land_appr[TimestepIndex(i),rgn_ind] * v.landdata[rgn_ind]))
      
                     end
     
-                    v.capital[i,m] = p.kgdp * v.ypc_seg[i,m] * v.popdens_seg[i,m] * 1e-6 
-                    v.coastArea[i,m] = calcCoastArea(v.areaparams[m,:], p.lslr[i,m])
-                    v.wetlandloss[i-1,m] = min(1, (localrate(p.lslr[i-1,m], p.lslr[i,m], p.tstep)/p.wmaxrate)^2)
+                    v.capital[TimestepIndex(i),m] = p.kgdp * v.ypc_seg[TimestepIndex(i),m] * v.popdens_seg[TimestepIndex(i),m] * 1e-6 
+                    v.coastArea[TimestepIndex(i),m] = calcCoastArea(v.areaparams[m,:], p.lslr[TimestepIndex(i),m])
+                    v.wetlandloss[TimestepIndex(i-1),m] = min(1, (localrate(p.lslr[TimestepIndex(i-1),m], p.lslr[TimestepIndex(i),m], p.tstep)/p.wmaxrate)^2)
                     
     
                 end
-                v.wetlandloss[p.ntsteps,m] = min(1, (localrate(p.lslr[p.ntsteps-1,m], p.lslr[p.ntsteps,m], p.tstep)/p.wmaxrate)^2)  
+                v.wetlandloss[TimestepIndex(p.ntsteps),m] = min(1, (localrate(p.lslr[TimestepIndex(p.ntsteps-1),m], p.lslr[TimestepIndex(p.ntsteps),m], p.tstep)/p.wmaxrate)^2)  
     
             end
     
@@ -341,7 +343,7 @@ using Mimi
      
                     # ** Calculate No Adaptation Costs **
                     for i in t_range
-                        R_NoAdapt = max(0, p.lslr[i,m])
+                        R_NoAdapt = max(0, p.lslr[TimestepIndex(i),m])
 
                         # For initial state in SLR cases, make adaptation decision relative to baseline (refA_H or R)
                         if p.rcp>0
@@ -351,19 +353,19 @@ using Mimi
                         # Incorporate any previous period adaptation
                         if p.fixed==false && !(is_first(t))
                             
-                            R_NoAdapt = max(R_NoAdapt, v.OptimalR[gettime(t)-1,m])
-                            v.WetlandNoAdapt[i,m] = p.tstep * v.wetlandservice[i,rgn_ind] * max(v.WetlandLossOptimal[gettime(t)-1,m],v.wetlandloss[i,m] * min(v.coastArea[i,m], p.wetland[m]))
+                            R_NoAdapt = max(R_NoAdapt, v.OptimalR[TimestepIndex(gettime(t)-1),m])
+                            v.WetlandNoAdapt[TimestepIndex(i),m] = p.tstep * v.wetlandservice[TimestepIndex(i),rgn_ind] * max(v.WetlandLossOptimal[TimestepIndex(gettime(t)-1),m],v.wetlandloss[TimestepIndex(i),m] * min(v.coastArea[TimestepIndex(i),m], p.wetland[m]))
                             if i==gettime(t)   
                                 # For start of new adaptation period, take into account (lack of) retreat done in previous periods (i.e. if they protected instead)
                                 # This results in double-costs for this period b/c no adaptation is set up to compute relative to t+1 lslr 
-                                v.coastAreaNoAdapt[i,m] = calcCoastArea(v.areaparams[m,:],v.OptimalR[gettime(t)-1,m])
+                                v.coastAreaNoAdapt[TimestepIndex(i),m] = calcCoastArea(v.areaparams[m,:],v.OptimalR[TimestepIndex(gettime(t)-1),m])
                             else
-                                v.coastAreaNoAdapt[i,m] = calcCoastArea(v.areaparams[m,:],R_NoAdapt)
+                                v.coastAreaNoAdapt[TimestepIndex(i),m] = calcCoastArea(v.areaparams[m,:],R_NoAdapt)
                             end
                             
                         else
-                            v.coastAreaNoAdapt[i,m]= v.coastArea[i,m]
-                            v.WetlandNoAdapt[i,m] = p.tstep * v.wetlandservice[i,rgn_ind] * v.wetlandloss[i,m] * min(v.coastArea[i,m], p.wetland[m]) 
+                            v.coastAreaNoAdapt[TimestepIndex(i),m]= v.coastArea[TimestepIndex(i),m]
+                            v.WetlandNoAdapt[TimestepIndex(i),m] = p.tstep * v.wetlandservice[TimestepIndex(i),rgn_ind] * v.wetlandloss[TimestepIndex(i),m] * min(v.coastArea[TimestepIndex(i),m], p.wetland[m]) 
                         end
                         
                         
@@ -373,7 +375,7 @@ using Mimi
                         v.StormPopNoAdapt[i,m] = p.tstep * (1 - v.ρ[i,rgn_ind ]) * v.popdens_seg[i,m] * v.vsl[i,m] * p.floodmortality * v.SIGMA[i,m,1] 
                         
                          
-                        v.StormLossNoAdapt[i,m] = p.tstep * (1 - v.ρ[i,rgn_ind ]) * v.popdens_seg[i,m] * p.floodmortality * v.SIGMA[i,m,1] 
+                        v.StormLossNoAdapt[i,m] = p.tstep * (1 - v.ρ[i,rgn_ind ]) * v.popdens_seg[i,m] * p.floodmortality * v.SIGMA[i,m,1]
                         if i==p.ntsteps
                             v.DryLandLossNoAdapt[i,m] = max(0,v.coastAreaNoAdapt[i,m]) # km^2
                         else

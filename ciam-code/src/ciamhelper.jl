@@ -220,7 +220,8 @@ function prepxsc(subset)
     segs = string.(sort(unique(collect(keys(xsc_char)))))
 
 #    xsc_ind = Dict{Any,Any}()      # numeric seg -> (numeric rgn, greenland bool)
-    xsc_ind = Dict{Int32,Tuple{Int32, Bool, Bool}}()      # numeric seg -> (numeric rgn, greenland bool) # TWmod
+    #xsc_ind = Dict{Int32,Tuple{Int32, Bool, Bool}}()      # numeric seg -> (numeric rgn, greenland bool) # TWmod
+    xsc_ind = Dict{Any,Any}()      # numeric seg -> (numeric rgn, greenland bool) # TWmod
     xsc_segmap = Dict{Any,Any}()   # Numeric seg/rgn -> char seg/rgn
     xsc_rgnmap = Dict{Any,Any}()
    
@@ -583,7 +584,7 @@ function load_segmap()
 end
 
 function load_xsc()
-    xsc = CSV.read(joinpath(@__DIR__,"..","data","input","xsc.csv")) |> DataFrame
+    xsc = CSV.read(joinpath(@__DIR__,"..","data","input","xsc.csv"), DataFrame) |> DataFrame
     return(xsc)
 end
 
