@@ -25,8 +25,12 @@ fixed=true
 
 import Pkg; Pkg.add("Query") # TWmod
 Pkg.add("StatsBase") # TWmod
+Pkg.add("DataFrames") # TWmod
 Pkg.add("DataDeps") # TWmod
 Pkg.add("Query") # TWmod
+Pkg.add("NetCDF") # TWmod
+Pkg.add("CSV") # TWmod
+using DataFrames # TWmod
 using DataDeps # TWmod
 using Query # TWmod
 using Mimi # TWmod

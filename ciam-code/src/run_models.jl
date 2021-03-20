@@ -1,5 +1,6 @@
 ## Run CIAM-Kopp and CIAM-BRICK 
-using MimiCIAM
+#using MimiCIAM
+include("MimiCIAM.jl")
 BRICKslr = ["BRICKsneasy-lsl_rcp85_p5.csv","BRICKsneasy-lsl_rcp85_p10.csv",
 "BRICKsneasy-lsl_rcp85_p50.csv","BRICKsneasy-lsl_rcp85_p90.csv","BRICKsneasy-lsl_rcp85_p95.csv"]
 KoppSlr = ["lsl_rcp85_p5.csv","lsl_rcp85_p50.csv","lsl_rcp85_p95.csv"]
