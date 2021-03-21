@@ -262,7 +262,7 @@ using Mimi
                 # Greenland segments are treated differently 
                 if isgreenland(m,p.xsc)==1
                     v.ypc_seg[t,m] =22642*1.01^1   # FLAG: assumes t is an index (1-20)
-                    v.vsl[t,m] = 1e-6 * p.vslmult * p.ypcc[TimestepIndex(1),p.rgn_ind_usa] * (v.ypc_seg[t,m]/p.ypcc[1,p.rgn_ind_usa])^p.vslel
+                    v.vsl[t,m] = 1e-6 * p.vslmult * p.ypcc[TimestepIndex(1),p.rgn_ind_usa] * (v.ypc_seg[t,m]/p.ypcc[TimestepIndex(1),p.rgn_ind_usa])^p.vslel
                     v.coastland[t,m] = (v.land_appr[TimestepIndex(1),p.rgn_ind_canada] * v.landdata[p.rgn_ind_canada]) * max(0.5, log(1+v.popdens_seg[t,m])/log(25))
                     v.landvalue[t,m] = min(v.coastland[t,m], (v.land_appr[TimestepIndex(1),p.rgn_ind_canada] * v.landdata[p.rgn_ind_canada]))
                 else
