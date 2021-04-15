@@ -24,4 +24,4 @@ m = MimiCIAM.get_model(t=10,initfile="../data/batch/init.txt",fixed=fixed,noRetr
 run(m)
 
 runname="lsl0_baseline"
-write_optimal_costs(m;runname=runname)
+MimiCIAM.write_optimal_costs(m;runname=runname)
