@@ -24,4 +24,9 @@ m = MimiCIAM.get_model(t=10,initfile="../data/batch/init.txt",fixed=fixed,noRetr
 run(m)
 
 runname="lsl0_baseline"
-MimiCIAM.write_optimal_costs(m;runname=runname)
+MimiCIAM.write_optimal_costs(m; runname=runname)
+MimiCIAM.write_optimal_protect_retreat(m; runname=runname)
+MimiCIAM.write_ciam(m; runname=runname, sumsegs="seg", varnames=false, tag="foo")
+MimiCIAM.write_ciam(m; runname=runname, sumsegs="global", varnames=false, tag="foo")
+# TODO - test region
+MimiCIAM.write_ciam(m; runname=runname, sumsegs="rgn", varnames=false, tag="foo")
