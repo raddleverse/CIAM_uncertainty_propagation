@@ -1,9 +1,14 @@
 ### Downscale BRICK from GMSL to LSL
 ### 3/18/2020
 
-# Retrieve BRICK fingerprints from NetCDF file 
+# Retrieve BRICK fingerprints from NetCDF file
 function get_fingerprints()
-    fp_file = datadep"BRICK fingerprints/FINGERPRINTS_SLANGEN_Bakker.nc"
+    if !isfile("../data/lslr/FINGERPRINTS_SLANGEN_Bakker.nc")
+        url = "https://github.com/scrim-network/BRICK/raw/master/fingerprints/FINGERPRINTS_SLANGEN_Bakker.nc"
+        download(url, "../data/lslr/FINGERPRINTS_SLANGEN_Bakker.nc")
+    end
+
+    fp_file = "../data/lslr/FINGERPRINTS_SLANGEN_Bakker.nc"
     fplat = ncread(fp_file,"lat")
     fplon = ncread(fp_file,"lon")
     fpAIS = ncread(fp_file,"AIS")
@@ -14,10 +19,10 @@ function get_fingerprints()
     return fplat,fplon,fpAIS,fpGSIC,fpGIS
 end
 
-# Get brick ensemble members for specified RCP from NetCDF file 
-# Returns time x ens arrays for brick components 
-function get_brickGMSL(gmslfile,rcp)
-    
+# Get brick ensemble members for specified RCP from NetCDF file
+# Returns time x ens arrays for brick components
+function get_brickGMSL_netcdf(gmslfile,rcp)
+
     brAIS= ncread(gmslfile,"AIS_RCP$(rcp)")
     brGSIC = ncread(gmslfile,"GSIC_RCP$(rcp)")
     brGIS = ncread(gmslfile,"GIS_RCP$(rcp)")
@@ -31,34 +36,55 @@ function get_brickGMSL(gmslfile,rcp)
 
 end
 
+# Get brick ensemble members for specified RCP from RData file
+# Returns time x ens arrays for brick components
+function get_brickGMSL_rdata(gmslfile,rcp)
+
+    if !isfile(gmslfile)
+        url = "https://zenodo.org/record/3628215/files/sample_projections.RData"
+        download(url, gmslfile)
+    end
+    brick = RData.load(gmslfile)
+    brAIS = brick["ais.rcp$(rcp)"]
+    brGSIC = brick["gic.rcp$(rcp)"]
+    brGIS = brick["gis.rcp$(rcp)"]
+    brTE = brick["te.rcp$(rcp)"]
+    brGMSL = brick["slr.rcp$(rcp)"]
+    brLWS = brGMSL - (brAIS + brGSIC + brGIS + brTE) # LWS not explicitly stored on this file, but it balances the GMSL
+    btime = brick["proj.time"]
+
+    return btime, brAIS, brGSIC, brGIS, brTE, brLWS, brGMSL
+
+end
+
 # Get CIAM lonlat tuples for specified segIDs
 # segID order does not matter; will sort tuples alphabetically by segment name
 function get_lonlat(segIDs)
-    ciamlonlat = CSV.read(joinpath(@__DIR__,"..","data","diva_segment_latlon.csv"))
+    ciamlonlat = CSV.read(joinpath(@__DIR__,"..","data","diva_segment_latlon.csv"), DataFrame)
 
     if segIDs==false
         filt = DataFrame(ciamlonlat)
     else
-        filt = ciamlonlat |> @filter(_.segid in segIDs) |> DataFrame 
+        filt = ciamlonlat |> @filter(_.segid in segIDs) |> DataFrame
     end
 
     sort!(filt, [:segments])
-    lons = filt.longi 
-    lats = filt.lati 
+    lons = filt.longi
+    lats = filt.lati
 
     return collect(zip(lons,lats))
 end
 
 # Choose n ensemble members randomly within specified percentile range
 # if percentile range is one number, will return that percentile (with respect to GMSL in specified year)
-# time - BRICK time vector from netcdf 
+# time - BRICK time vector from netcdf
 # ens - BRICK GMSL matrix, time x num ensembles
 # low - minimum percentile threshold (integer - e.g. 5 = 5th percentile)
 # high - maximum percentile threshold
 function choose_ensemble_members(time, ens, n, low, high, yend,ensInds)
     if length(time)==size(ens)[1]
         end_year = findall(x -> x==yend, time)[1]
-        
+
         val_low = percentile(ens[end_year,:],low)
         val_high = percentile(ens[end_year,:],high)
 
@@ -70,26 +96,26 @@ function choose_ensemble_members(time, ens, n, low, high, yend,ensInds)
             else
                 chosen_inds= ens_inds
             end
-            return chosen_inds 
+            return chosen_inds
         else
             chosen_inds = ensInds
             return chosen_inds
         end
-      
+
     else
         println("Error: time dimension mismatch")
     end
 end
 
-# downscale_brick: downscale BRICK gmsl to lsl for all segments and ensembles of interest 
-# Input: 
+# downscale_brick: downscale BRICK gmsl to lsl for all segments and ensembles of interest
+# Input:
 # brickcomps - BRICK components (time x ens matrices corresponding to brick gmsl components)
-# lonlat - vector of (lon,lat) tuples, sorted corresp to segment name alphabetical order  
-# Output: 
+# lonlat - vector of (lon,lat) tuples, sorted corresp to segment name alphabetical order
+# Output:
 # lsl_out: ens x time x segment array of local sea levels, sorted in alphabetical order by segment name
 # GMSL: global mean sea levels corresponding to local sea level arrays (time x ens)
 function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tstep=10)
-    # To do - check with vectors of lat, lon 
+    # To do - check with vectors of lat, lon
     (fplat,fplon,fpAIS,fpGSIC,fpGIS) = get_fingerprints()
     (btime,AIS,GSIC,GIS,TE,LWS,GMSL) = brickcomps
 
@@ -99,7 +125,7 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
     yinds = findall(x -> x % tstep==0, years)
 
     tdim=length(btime)
-    
+
     if length(years)==length(tinds)
         tinds = tinds[yinds]
     else
@@ -109,10 +135,10 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
 
     num_ens = length(ensInds)
 
-    # Output matrix: ens x time x segment 
+    # Output matrix: ens x time x segment
     lsl_out = zeros(num_ens, length(tinds), length(lonlat))
-  
-    # Trim component vectors to timesteps and ensembles. Assume interval is 1 year 
+
+    # Trim component vectors to timesteps and ensembles. Assume interval is 1 year
     if tdim==size(AIS)[1] # check that time dimension is 1
         AIS = AIS[tinds,ensInds]
         GSIC = GSIC[tinds,ensInds]
@@ -125,7 +151,7 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
         return nothing
     end
 
-    for f in 1:length(lonlat) # Loop through lonlat tuples 
+    for f in 1:length(lonlat) # Loop through lonlat tuples
 
         lon = lonlat[f][1]
         lat = lonlat[f][2]
@@ -134,33 +160,33 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
         if lon <0
             lon = lon + 360
         end
-    
-        # Find fingerprint degrees nearest to lat,lon 
+
+        # Find fingerprint degrees nearest to lat,lon
         ilat = findall(isequal(minimum(abs.(fplat.-lat))),abs.(fplat.-lat))
         ilon = findall(isequal(minimum(abs.(fplon.-lon))),abs.(fplon.-lon))
-        
+
 
         # Take average of closest lat/lon values
         fpAIS_flat = collect(skipmissing(Iterators.flatten(fpAIS[ilon,ilat])))
         fpGSIC_flat = collect(skipmissing(Iterators.flatten(fpGSIC[ilon,ilat])))
         fpGIS_flat = collect(skipmissing(Iterators.flatten(fpGSIC[ilon,ilat])))
-        
+
         fpAIS_loc = mean(fpAIS_flat[isnan.(fpAIS_flat).==false],dims=1)[1]
         fpGSIC_loc = mean(fpGSIC_flat[isnan.(fpGSIC_flat).==false],dims=1)[1]
         fpGIS_loc = mean(fpGIS_flat[isnan.(fpGIS_flat).==false],dims=1)[1]
         fpTE_loc = 1.0
         fpLWS_loc=1.0
 
-        # Keep searching nearby lat/lon values if fingerprint value is NaN unless limit is hit 
+        # Keep searching nearby lat/lon values if fingerprint value is NaN unless limit is hit
         inc =1
-        
+
         while isnan(fpAIS_loc) || isnan(fpGIS_loc) || isnan(fpGSIC_loc) && inc<5
-       
+
             newlonStart = lon_subtractor.(fplon[ilon],inc)[1]
             newlatStart = lat_subtractor.(fplat[ilat],inc)[1]
             newlonEnd = lon_adder.(fplon[ilon],inc)[1]
             newlatEnd = lat_adder.(fplat[ilat],inc)[1]
-            
+
             latInd1 = minimum(findall(isequal(minimum(abs.(fplat.-newlatStart))),abs.(fplat.-newlatStart)))
             #minimum(findall(x-> x in newlatStart,fplat))
             latInd2 = maximum(findall(isequal(minimum(abs.(fplat.-newlatEnd))),abs.(fplat.-newlatEnd)))
@@ -170,7 +196,7 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
             #minimum(findall(x-> x in newlonStart,fplon))
             lonInd2 = maximum(findall(isequal(minimum(abs.(fplon.-newlonEnd))),abs.(fplon.-newlonEnd)))
             #maximum(findall(x -> x in newlonEnd,fplon))
-        
+
             if latInd2 < latInd1
                 latInds=[latInd1; 1:latInd2]
             else
@@ -186,35 +212,37 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
             fpAIS_flat = collect(skipmissing(Iterators.flatten(fpAIS[lonInds,latInds])))
             fpGSIC_flat = collect(skipmissing(Iterators.flatten(fpGSIC[lonInds,latInds])))
             fpGIS_flat = collect(skipmissing(Iterators.flatten(fpGSIC[lonInds,latInds])))
-          
+
             fpAIS_loc = mean(fpAIS_flat[isnan.(fpAIS_flat).==false],dims=1)[1]
             fpGSIC_loc = mean(fpGSIC_flat[isnan.(fpGSIC_flat).==false],dims=1)[1]
             fpGIS_loc = mean(fpGIS_flat[isnan.(fpGIS_flat).==false],dims=1)[1]
 
-            inc = inc + 1 
-        
-        end
-   
-        # If still NaN, throw an error 
-        if isnan(fpAIS_loc) || isnan(fpGIS_loc) || isnan(fpGSIC_loc)
-            println("Error: no fingerprints found for ($(lon),$(lat))")
-            return nothing 
+            inc = inc + 1
+
         end
 
-       # Multiply fingerprints by BRICK ensemble members 
-        for n in 1:size(AIS)[2] # loop through ensemble members 
-            lsl_out[n, :, f] = fpGIS_loc * GIS[:,n] + fpAIS_loc * AIS[:,n] + fpGSIC_loc * GSIC[:,n] + 
+        # If still NaN, throw an error
+        if isnan(fpAIS_loc) || isnan(fpGIS_loc) || isnan(fpGSIC_loc)
+            println("Error: no fingerprints found for ($(lon),$(lat))")
+            return nothing
+        end
+
+       # Multiply fingerprints by BRICK ensemble members
+        for n in 1:size(AIS)[2] # loop through ensemble members
+            lsl_out[n, :, f] = fpGIS_loc * GIS[:,n] + fpAIS_loc * AIS[:,n] + fpGSIC_loc * GSIC[:,n] +
                 fpTE_loc * TE[:,n] + fpLWS_loc * LWS[:,n]
         end
 
-    end # End lonlat tuple 
+    end # End lonlat tuple
 
-    return lsl_out,GMSL 
+    return lsl_out,GMSL
 end
 
-# Driver function to downscale BRICK gmsl for specified segments 
+# Driver function to downscale BRICK gmsl for specified segments
 function brick_lsl(rcp,segIDs,brickfile,n,low=5,high=95,ystart=2010,yend=2100,tstep=10,ensInds=false)
-    brickGMSL = get_brickGMSL(brickfile,rcp)
+    # HERE - if you want to use a different set of SLR projections, or projections
+    # that are stored in a different format, a new get_brickGMSL_xxx might be needed
+    brickGMSL = get_brickGMSL_rdata(brickfile,rcp)
     brickEnsInds = choose_ensemble_members(brickGMSL[1],brickGMSL[7],n,low,high,yend,ensInds)
     lonlat = get_lonlat(segIDs)
 
@@ -248,11 +276,11 @@ function brickCIAM_driver(rcp,brickfile,n,low=5,high=95,ystart=2010,yend=2100,ts
         t = length(years)
     else
         println("Error: end year exceeds CIAM bounds.")
-        return nothing 
+        return nothing
     end
 
-    # Set up CIAM using init.txt defaults for SSP and subsets 
-    m = MimiCIAM.get_model(t=t,noRetreat=noRetreat) 
+    # Set up CIAM using init.txt defaults for SSP and subsets
+    m = MimiCIAM.get_model(t=t,noRetreat=noRetreat)
     globalNPV = zeros(n)
     globalWetlandLoss = zeros(n)
     globalDrylandLoss = zeros(n)
@@ -277,7 +305,7 @@ function brickCIAM_driver(rcp,brickfile,n,low=5,high=95,ystart=2010,yend=2100,ts
     for i in 1:n
         update_param!(m, :lslr, lsl[i,:,:])
         run(m)
-        # store output 
+        # store output
         globalNPV[i] = m[:slrcost,:NPVOptimalTotal]
      #   globalWetlandLoss[i]= sum(m[:slrcost,:WetlandAreaOptimal][t,:])
      #   globalDrylandLoss[i] = sum(m[:slrcost,:DryLandLossOptimal][t,:])
@@ -290,7 +318,7 @@ function brickCIAM_driver(rcp,brickfile,n,low=5,high=95,ystart=2010,yend=2100,ts
         segLevel2100[i,:]=m[:slrcost,:OptimalLevel][10,:]
       #  lsl2050[i,:] = m[:slrcost, :lslr][5,:]
       #  lsl2100[i,:] = m[:slrcost,:lslr][10,:]
-    
+
         # To do - NPV for these vars (Friday-ish)
         # segWetland[:,i]=transpose(sum(m[:slrcost,:OptimalWetland],dims=1))
         # segStormPop[:,i]=transpose(sum(m[:slrcost,:OptimalStormPop],dims=1))
@@ -299,7 +327,7 @@ function brickCIAM_driver(rcp,brickfile,n,low=5,high=95,ystart=2010,yend=2100,ts
         # segFlood[:,i]=m[:slrcost,:OptimalFlood]
         # segRelocate[:,i]=m[:slrcost,:OptimalRelocate]
 
-    end 
+    end
     results_global = (globalNPV)#,globalWetlandLoss,globalDrylandLoss,globalStormLoss)
     #results_seg = (segNpv,segOption,segLevel,segWetland,segStormPop,segStormCap,segConstruct,segFlood,segRelocate)
     results_seg = (segNpv,segOption2050,segLevel2050,segOption2100,segLevel2100)
@@ -313,7 +341,7 @@ function adder(maxval)
     function y(point,n)
         if point + n > maxval
             return point + n - maxval
-        else 
+        else
             return point + n
         end
     end

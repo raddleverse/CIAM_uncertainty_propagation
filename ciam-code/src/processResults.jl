@@ -1,16 +1,18 @@
 # Functions to process CIAM data and make plots
-include("ciamhelper.jl")
+#include("ciamhelper.jl") # already included in MimiCIAM package - shouldn't need, but we'll see how this goes
 
 function procGlobalOutput(glob,gmsl,inds,brickfile,rcp,noRetreat,outfile=false,tstart=2010,tend=2100)
-    (fd_inds,nofd_inds)=getFastDynInds(brickfile,inds,rcp,tstart,tend)
 
-    # Get Global NPV w/ and w/o fast dyn
+    # Get Global NPV
     npv = glob
-    npv_fd = npv[fd_inds]
-    npv_nofd=npv[nofd_inds]
 
-    gmsl_fd = gmsl[10,fd_inds]
-    gmsl_nofd=gmsl[10,nofd_inds]
+    #gmsl_fd = gmsl[10,fd_inds]
+    #gmsl_nofd=gmsl[10,nofd_inds]
+    gmsl2040 = gmsl[4,:]
+    gmsl2060 = gmsl[6,:]
+    gmsl2080 = gmsl[8,:]
+    gmsl2100 = gmsl[10,:]
+    # CAUTION! this is hardwired for 2010-2100
 
     if noRetreat==false
         lab="With Retreat"
@@ -18,17 +20,19 @@ function procGlobalOutput(glob,gmsl,inds,brickfile,rcp,noRetreat,outfile=false,t
         lab="No Retreat"
     end
 
-    df1 = DataFrame([npv_fd gmsl_fd])
-    df1[:brick]="Fast Dynamics"
-    df1[:retreat]=lab
+    df1 = DataFrame([npv gmsl2100])
+    #df1[:brick]="Fast Dynamics"
+    df1[!,:retreat] = fill(lab, size(df1)[1])
 
-    df2 = DataFrame([npv_nofd gmsl_nofd])
-    df2[:brick]="No Fast Dynamics"
-    df2[:retreat]=lab
+    #df2 = DataFrame([npv_nofd gmsl_nofd])
+    #df2[:brick]="No Fast Dynamics"
+    #df2[:retreat]=lab
 
-    outdf = [df1;df2]
-    names!(outdf,[:npv,:gmsl,:brick,:retreat])
-    outdf[:brickEnsInd]=inds
+    #outdf = [df1;df2]
+    outdf = df1
+    
+    rename!(outdf,[:npv,:gmsl2100,:retreat])
+    outdf[!,:brickEnsInd] = inds
 
     if outfile==false
         CSV.write("output/ciammcs/globalNPV_rcp$(rcp)_noRetreat$(noRetreat)_mcs_newPop_maintainFalse.csv",outdf)
@@ -39,7 +43,6 @@ function procGlobalOutput(glob,gmsl,inds,brickfile,rcp,noRetreat,outfile=false,t
 end
 
 function procSegResults(m,seg,lsl,inds,brickfile,rcp,noRetreat,tstart=2010,tend=2100)
-    (fd_inds,nofd_inds)=getFastDynInds(brickfile,inds,rcp,tstart,tend)
     segmap = load_segmap()
     segIDs = m[:slrcost,:segID]
     segNames =segID_to_seg(segIDs,segmap)
@@ -70,13 +73,13 @@ function procSegResults(m,seg,lsl,inds,brickfile,rcp,noRetreat,tstart=2010,tend=
 
     opt2050_Fd = opt2050[indsFd,:]
     opt2050_noFd = opt2050[indsNoFd,:]
-    
+
     lev2050_Fd = lev2050[indsFd,:]
     lev2050_noFd = lev2050[indsNoFd,:]
-    
+
     opt2100_Fd = opt2100[indsFd,:]
     opt2100_noFd = opt2100[indsNoFd,:]
-    
+
     lev2100_Fd = lev2100[indsFd,:]
     lev2100_noFd = lev2100[indsNoFd,:]
 
@@ -125,18 +128,6 @@ function procSegResults(m,seg,lsl,inds,brickfile,rcp,noRetreat,tstart=2010,tend=
     end
 end
 
-
-function getFastDynInds(brickfile,inds,rcp,tstart,tend)
-    vdisint=ncread(brickfile,"vdisint_RCP$(rcp)")
-    (start_ind,end_ind)=getbricktime(brickfile,tstart,tend)
-    vdisint=vdisint[start_ind:end_ind,inds]
-    vdisint_sum=sum(vdisint,dims=1)
-    fd_inds = [i[2] for i in findall(x-> x>0,vdisint_sum)]
-    nofd_inds = [i[2] for i in findall(x-> x==0,vdisint_sum)]
-    return fd_inds,nofd_inds
-
-end
-
 function getbricktime(brickfile,tstart,tend)
     years=ncread(brickfile,"time_proj")
     start_ind =findall(x->x==tstart,years)[1]
@@ -154,16 +145,14 @@ end
 
 # Function: plot costs on map (5-95%, outliers as insets)
 
-# Function: plot dist 
+# Function: plot dist
 # function plotDists(tabstr,globOrSeg="glob")
 #     tab = CSV.read(tabstr)
 #     if globOrSeg=="glob"
-#          ## GMSL Distribution Plot 
+#          ## GMSL Distribution Plot
 #          gmslPlot = @df tab density(:gmsl,group=(:brickOutput),label=[:brickOutput])
 
 #     else
 #     end
 
 # end
-
-
