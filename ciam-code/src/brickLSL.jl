@@ -81,25 +81,48 @@ end
 # ens - BRICK GMSL matrix, time x num ensembles
 # low - minimum percentile threshold (integer - e.g. 5 = 5th percentile)
 # high - maximum percentile threshold
-function choose_ensemble_members(time, ens, n, low, high, yend,ensInds)
+function choose_ensemble_members(time, ens, n, low, high, yend, ensInds)
     if length(time)==size(ens)[1]
         end_year = findall(x -> x==yend, time)[1]
 
         val_low = percentile(ens[end_year,:],low)
         val_high = percentile(ens[end_year,:],high)
 
-        if ensInds==false
-            ens_inds = findall(x -> x >= val_low && x <= val_high, ens[end_year,:])
-
-            if length(ens_inds)>1
-                chosen_inds = ens_inds[sample(1:end,n,replace=false)]
+        if val_low==val_high
+            # pick just the one ensemble member that fits
+            # get rid of NANs first
+            ens_inds = findall(!isnan, ens[end_year,:])
+            val_low = percentile(ens[end_year,ens_inds],low) # only need one because we know they're equal here
+            # then, see if there's a single member of the ensemble that has the desired percentile
+            idx_perc = findall(x -> x==val_low, ens[end_year,ens_inds]) # idx_perc is idx within ens_inds
+            if length(idx_perc) > 1
+                idx_perc=idx_perc[1] # if more than 1, just take the first one
+            elseif length(idx_perc) == 0
+                # try trimming out the maximum element
+                ens_inds2 = findall(x -> x < maximum(ens[end_year,ens_inds]), ens[end_year,ens_inds])
+                val_low = percentile(ens[end_year,ens_inds[ens_inds2]],low)
+                val_high = percentile(ens[end_year,ens_inds[ens_inds2]],high)
+                idx_perc = findall(x -> x==val_low, ens[end_year,ens_inds[ens_inds2]]) # idx_perc is idx within ens_inds2, which is within ens_inds
+                return ens_inds[ens_inds2[idx_perc]]
             else
-                chosen_inds= ens_inds
+                return ens_inds[idx_perc]
             end
-            return chosen_inds
+            # now, get quantile
+
         else
-            chosen_inds = ensInds
-            return chosen_inds
+            if ensInds==false
+                ens_inds = findall(x -> x >= val_low && x <= val_high, ens[end_year,:])
+
+                if length(ens_inds)>1
+                    chosen_inds = ens_inds[sample(1:end,n,replace=false)]
+                else
+                    chosen_inds= ens_inds
+                end
+                return chosen_inds
+            else
+                chosen_inds = ensInds
+                return chosen_inds
+            end
         end
 
     else
