@@ -44,6 +44,8 @@ MimiCIAM.write_optimal_costs(m; runname=runname)
 
 ##==============================================================================
 ## changing things
+## at this point, with updated SLR, need to modify `at.csv` to exclude the adaptation
+## period starting at t=19 because that is outside the time horizon of the Vega-Westhoff et al 2020
 
 ## baseline+updated SLR
 rcp = 85
@@ -55,7 +57,7 @@ lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false)
 lslr=lsl[1]
 gmsl=lsl[2]
 ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m,:time,15)
+m = MimiCIAM.get_model(t=15,initfile="../data/batch/init.txt",fixed=fixed,noRetreat=noRetreat,allowMaintain=allowMaintain)
 update_param!(m,:lslr,lslr[1,:,:])
 run(m)
 MimiCIAM.write_ciam(m; runname=runname, sumsegs="global", varnames=false, tag="test")
