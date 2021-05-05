@@ -111,6 +111,10 @@ function choose_ensemble_members(time, ens, n, low, high, yend, ensInds)
 
         else
             if ensInds==false
+                idx_good = findall(!isnan, ens[end_year,:])
+                val_low = percentile(ens[end_year,idx_good],low)
+                val_high = percentile(ens[end_year,idx_good],high)
+
                 ens_inds = findall(x -> x >= val_low && x <= val_high, ens[end_year,:])
 
                 if length(ens_inds)>1
