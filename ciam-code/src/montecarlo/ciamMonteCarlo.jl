@@ -33,12 +33,11 @@ function runTrials(rcp,trial_params,adaptRegime)
     rgns=["USA"] # USA Seg IDs of interest
     for i=1:num_ens
         update_param!(m,:lslr,lslr[i,:,:])
-        res=run_ciam_mcs(m,1,10,outfilepath, false)
-
-        res1=DataFrame([res.current_data])
-        global outtrials=[outtrials;res1]
-        ts= MimiCIAM.getTimeSeries(m,i,rgns=rgns)
-        global outts=[outts;ts]
+        res = run_ciam_mcs(m, 1, 10, outfilepath, false)
+        res1 = DataFrame([res.current_data])
+        global outtrials = [outtrials;res1]
+        ts = MimiCIAM.getTimeSeries(m,i,rgns=false,sumsegs="global")
+        global outts = [outts;ts]
         globalNPV[i] = m[:slrcost,:NPVOptimalTotal]
     end
 
