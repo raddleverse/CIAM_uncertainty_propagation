@@ -1,10 +1,17 @@
+##==============================================================================
+## run_ciam_mcs.jl
+##
+## Original code: Catherine Ledna (4 Feb 2021)
+## Modified code: Tony Wong (16 May 2021)
+##==============================================================================
+
 using Dates
 using CSV
 
 """
-Adapted from run_fund_mcs.jl in MimiFUND. 
+Adapted from run_fund_mcs.jl in MimiFUND.
 Run a Monte Carlo simulation with the CIAM model over its distributional parameters.
-trials: number of trials to run. 
+trials: number of trials to run.
 ntsteps: number of timesteps to run
 output_dir: an output directory
 save_trials: whether to generate and save MC trial values to a file
@@ -20,8 +27,8 @@ function run_ciam_mcs(model,trials=10000,ntsteps=10,output_dir=nothing, save_tri
     mcs = getmcs()
 
     # run monte carlo trials
-    res = run(mcs, model, trials; 
-        trials_output_filename = trials_output_filename, 
+    res = run(mcs, model, trials;
+        trials_output_filename = trials_output_filename,
         ntimesteps = ntsteps, results_output_dir = "$output_dir/results")
 
     return res

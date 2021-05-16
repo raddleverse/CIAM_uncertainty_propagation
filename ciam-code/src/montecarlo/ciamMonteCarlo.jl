@@ -1,5 +1,11 @@
+##==============================================================================
+## ciamMonteCarlo.jl
+##
+## Original code: Catherine Ledna (4 Feb 2021)
+## Modified code: Tony Wong (16 May 2021)
+##==============================================================================
 
-function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true)
+function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true,runname=false)
     #outfilepath = joinpath("/Volumes/MASTERS/ciammcs","CIAM$(Dates.format(now(), "yyyy-mm-dd HH-MM-SS"))MC$(trial_params["n"])Reg$(adaptRegime["regimeNum"])")
     outfilepath = "../../output"
     mkpath("$outfilepath/monteCarlo_results")
@@ -54,13 +60,23 @@ function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true)
     end
 
     # Write Trials, Global NPV and Time Series
-    outtrialsname="$(outfilepath)/results/trials.csv"
+    if runname
+        outtrialsname="$(outfilepath)/results/trials_$(runname).csv"
+        outnpvname="$(outfilepath)/results/globalnpv_$(runname).csv"
+        outtsname="$(outfilepath)/results/globalts_$(rcp)_$(runname).csv"
+    else
+        outtrialsname="$(outfilepath)/results/trials.csv"
+        outnpvname="$(outfilepath)/results/globalnpv.csv"
+        outtsname="$(outfilepath)/results/globalts_$(rcp).csv"
+    end
+
     CSV.write(outtrialsname,outtrials)
-
-    outnpvname="$(outfilepath)/results/globalnpv.csv"
     procGlobalOutput(globalNPV,gmsl,ensInds,trial_params["brickfile"],rcp,adaptRegime["noRetreat"],outnpvname)
-
     outtsname="$(outfilepath)/results/globalts_$(rcp).csv"
     CSV.write(outtsname,outts)
 
 end
+
+##==============================================================================
+## End
+##==============================================================================

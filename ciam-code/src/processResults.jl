@@ -1,3 +1,10 @@
+##==============================================================================
+## processResults.jl
+##
+## Original code: Catherine Ledna (4 Feb 2021)
+## Modified code: Tony Wong (16 May 2021)
+##==============================================================================
+
 # Functions to process CIAM data and make plots
 #include("ciamhelper.jl") # already included in MimiCIAM package - shouldn't need, but we'll see how this goes
 
@@ -30,7 +37,7 @@ function procGlobalOutput(glob,gmsl,inds,brickfile,rcp,noRetreat,outfile=false,t
 
     #outdf = [df1;df2]
     outdf = df1
-    
+
     rename!(outdf,[:npv,:gmsl2100,:retreat])
     outdf[!,:brickEnsInd] = inds
 

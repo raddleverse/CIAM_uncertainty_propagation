@@ -1,4 +1,9 @@
-# baseline comparisons against the GAMS results
+##==============================================================================
+## baseline_comparisons.jl
+## baseline comparisons against the GAMS results
+##
+## Tony Wong (aewsma@rit.edu)
+##==============================================================================
 
 using Mimi, MimiCIAM, Query, RData, StatsBase, CSV, DataFrames, NetCDF
 

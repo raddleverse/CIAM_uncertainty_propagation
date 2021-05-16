@@ -9,6 +9,16 @@ ciam_default_mcs = @defsim begin
     wvpdl = Truncated(Normal(0.47,0.12),0.0,1.0) # From Brander et al (2006)
 end
 
-function getmcs()
-    return deepcopy(ciam_default_mcs)
+# hack to use the same interface but only sample a fixed central value
+ciam_fixed_mcs = @defsim begin
+    movefactor= TriangularDist(1,1,1)          # From Diaz (2016); incorporates communication with Mendelsohn and Anthoff and Tol (2014)
+    dvbm= TriangularDist(5.376,5.376,5.376)    # Updated to 2010USD from FUND
+    vslel = TriangularDist(0.47,0.47,0.47)     # From Viscusi and Aldy (2003)
+    vslmult = TriangularDist(200,200,200)      # From FUND (originally Cline (1992))
+    wvel = TriangularDist(1.16,1.16,1.16)      # From Brander et al (2006)
+    wvpdl = TriangularDist(0.47,0.47,0.47)     # From Brander et al (2006)
+end
+
+function getmcs(dists=ciam_default_mcs)
+    return deepcopy(dists)
 end

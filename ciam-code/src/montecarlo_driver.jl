@@ -1,3 +1,8 @@
+##==============================================================================
+## montecarlo_driver.jl
+##
+## Tony Wong (aewsma@rit.edu)
+##==============================================================================
 
 cd("/Users/aewsma/codes/CIAM_adaptation_regimes/ciam-code/src")
 
@@ -49,8 +54,37 @@ txtfile=open("../data/batch/init.txt","w") do io
 end
 
 # vary SLR and CIAM parameters
-runTrials(85,trial_params,adaptRegime1,vary_slr=true,vary_ciam=true)
+runname = "SSP5_BRICK85_varySLR_varyCIAM"
+runTrials(85,trial_params,adaptRegime1,vary_slr=true,vary_ciam=true,runname=runname)
 
 # vary only CIAM parameters
 trial_params["low"] = trial_params["high"] = 50
-runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=true)
+runname = "SSP5_BRICK85_varyCIAM"
+runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=true,runname=runname)
+
+# vary only BRICK parameters
+# TODO
+#runname = "SSP5_BRICK85_varyBRICK"
+#runTrials(85,trial_params,adaptRegime1,vary_slr=true,vary_ciam=false,runname=runname)
+
+# only 5th percentile of SLR, with CIAM defaults
+# TODO
+#trial_params["low"] = trial_params["high"] = 5
+#runname = "SSP5_BRICK85_p05"
+#runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=false,runname=runname)
+
+# only 50th percentile of SLR, with CIAM defaults
+# TODO
+#trial_params["low"] = trial_params["high"] = 50
+#runname = "SSP5_BRICK85_p50"
+#runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=false,runname=runname)
+
+# only 95th percentile of SLR, with CIAM defaults
+# TODO
+#trial_params["low"] = trial_params["high"] = 95
+#runname = "SSP5_BRICK85_p95"
+#runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=false,runname=runname)
+
+##==============================================================================
+## End
+##==============================================================================

@@ -1,5 +1,11 @@
-### Downscale BRICK from GMSL to LSL
-### 3/18/2020
+##==============================================================================
+## processResults.jl
+## Downscale BRICK from GMSL to LSL
+##
+## Original code: Catherine Ledna (18 Mar 2020)
+## Modified code: Tony Wong (16 May 2021)
+##==============================================================================
+
 
 # Retrieve BRICK fingerprints from NetCDF file
 function get_fingerprints()
