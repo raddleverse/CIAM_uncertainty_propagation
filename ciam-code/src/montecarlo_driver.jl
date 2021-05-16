@@ -20,7 +20,7 @@ include("processResults.jl")
 #   start and end year, timestep and number of timesteps
 trial_params=Dict(
     "brickfile" => "../data/lslr/BRICK_projections.RData",
-    "n" => 5,
+    "n" => 200,
     "high" => 97.5,
     "low" => 2.5,
     "ystart" => 2010,

@@ -98,12 +98,9 @@ function choose_ensemble_members(time, ens, n, low, high, yend, ensInds)
             if length(idx_perc) > 1
                 idx_perc=idx_perc[1] # if more than 1, just take the first one
             elseif length(idx_perc) == 0
-                # try trimming out the maximum element
-                ens_inds2 = findall(x -> x < maximum(ens[end_year,ens_inds]), ens[end_year,ens_inds])
-                val_low = percentile(ens[end_year,ens_inds[ens_inds2]],low)
-                val_high = percentile(ens[end_year,ens_inds[ens_inds2]],high)
-                idx_perc = findall(x -> x==val_low, ens[end_year,ens_inds[ens_inds2]]) # idx_perc is idx within ens_inds2, which is within ens_inds
-                return ens_inds[ens_inds2[idx_perc]]
+                # take the nearest one
+                idx_perc = findmin(broadcast(abs, ens[end_year, ens_inds] .- val_low))[2]
+                return ens_inds[idx_perc]
             else
                 return ens_inds[idx_perc]
             end
@@ -255,10 +252,17 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
         end
 
        # Multiply fingerprints by BRICK ensemble members
-        for n in 1:size(AIS)[2] # loop through ensemble members
-            lsl_out[n, :, f] = fpGIS_loc * GIS[:,n] + fpAIS_loc * AIS[:,n] + fpGSIC_loc * GSIC[:,n] +
-                fpTE_loc * TE[:,n] + fpLWS_loc * LWS[:,n]
+       # is this actually necessary?
+       if ndims(AIS) > 1
+            for n in 1:size(AIS)[2] # loop through ensemble members
+                lsl_out[n, :, f] = fpGIS_loc * GIS[:,n] + fpAIS_loc * AIS[:,n] + fpGSIC_loc * GSIC[:,n] +
+                    fpTE_loc * TE[:,n] + fpLWS_loc * LWS[:,n]
+            end
+        else
+            lsl_out[1, :, f] = fpGIS_loc * GIS[:] + fpAIS_loc * AIS[:] + fpGSIC_loc * GSIC[:] +
+                fpTE_loc * TE[:] + fpLWS_loc * LWS[:]
         end
+
 
     end # End lonlat tuple
 

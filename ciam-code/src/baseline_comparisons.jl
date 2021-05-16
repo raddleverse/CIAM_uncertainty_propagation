@@ -178,6 +178,42 @@ MimiCIAM.write_ciam(m; runname=runname, sumsegs="global", varnames=false)
 MimiCIAM.write_ciam(m; runname=runname, sumsegs="seg", varnames=false)
 MimiCIAM.write_optimal_costs(m; runname=runname)
 
+## same, but ensemble member giving the 5th percentile of GMSL used
+rcp = 85
+brickfile = "../data/lslr/BRICK_projections.RData"
+runname="ctrl+SSP5+popJones+BRICKLSL85_p05"
+pop = 1
+SSP = "IIASAGDP_SSP5_v9_130219"
+SSP_simp = "5" #SSP = "IIASAGDP_SSP5_v9_130219"
+lsl = brick_lsl(rcp,segIDs,brickfile,1,5,5,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
+lslr=lsl[1]
+gmsl=lsl[2]
+ensInds=lsl[3] # Indices of original BRICK array
+m = MimiCIAM.get_model(t=15,initfile="../data/batch/init.txt",fixed=fixed,noRetreat=noRetreat,allowMaintain=allowMaintain, popinput=pop)
+update_param!(m, :lslr, lslr[1,:,:])
+update_param!(m, :ssp, parse(Int32, SSP_simp))
+run(m)
+MimiCIAM.write_ciam(m; runname=runname, sumsegs="global", varnames=false)
+MimiCIAM.write_ciam(m; runname=runname, sumsegs="seg", varnames=false)
+MimiCIAM.write_optimal_costs(m; runname=runname)
+
+rcp = 85
+brickfile = "../data/lslr/BRICK_projections.RData"
+runname="ctrl+SSP5+popJones+BRICKLSL85_p95"
+pop = 1
+SSP = "IIASAGDP_SSP5_v9_130219"
+SSP_simp = "5" #SSP = "IIASAGDP_SSP5_v9_130219"
+lsl = brick_lsl(rcp,segIDs,brickfile,1,95,95,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
+lslr=lsl[1]
+gmsl=lsl[2]
+ensInds=lsl[3] # Indices of original BRICK array
+m = MimiCIAM.get_model(t=15,initfile="../data/batch/init.txt",fixed=fixed,noRetreat=noRetreat,allowMaintain=allowMaintain, popinput=pop)
+update_param!(m, :lslr, lslr[1,:,:])
+update_param!(m, :ssp, parse(Int32, SSP_simp))
+run(m)
+MimiCIAM.write_ciam(m; runname=runname, sumsegs="global", varnames=false)
+MimiCIAM.write_ciam(m; runname=runname, sumsegs="seg", varnames=false)
+MimiCIAM.write_optimal_costs(m; runname=runname)
 
 
 ##==============================================================================

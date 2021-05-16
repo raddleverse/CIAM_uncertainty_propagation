@@ -18,16 +18,20 @@ function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true)
     # Load BRICK data
     if vary_slr
         lsl = brick_lsl(rcp,segIDs,trial_params["brickfile"],trial_params["n"],trial_params["low"],trial_params["high"],trial_params["ystart"],trial_params["yend"],trial_params["tstep"],false)
+        lslr=lsl[1]
+        gmsl=lsl[2]
+        ensInds=lsl[3] # Indices of original BRICK array
     else
         if trial_params["low"]==trial_params["high"]
             lsl = brick_lsl(rcp,segIDs,trial_params["brickfile"],1,trial_params["low"],trial_params["high"],trial_params["ystart"],trial_params["yend"],trial_params["tstep"],false)
+            lslr=repeat(lsl[1],outer=(trial_params["n"],1,1))
+            gmsl=repeat(lsl[2],outer=(1,trial_params["n"]))
+            ensInds=repeat(lsl[3],trial_params["n"])
         else
             error("Not varying SLR in Monte Carlo sampling, but the low and high quantiles requested are not equal.")
         end
     end
-    lslr=lsl[1]
-    gmsl=lsl[2]
-    ensInds=lsl[3] # Indices of original BRICK array
+
     num_ens=trial_params["n"]
 
     m = MimiCIAM.get_model(t=trial_params["t"], initfile="../data/batch/init.txt",
@@ -40,8 +44,7 @@ function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true)
     globalNPV = zeros(num_ens)
     rgns=["USA"] # USA Seg IDs of interest
     for i=1:num_ens
-        idx_lslr = i%size(lslr)[1] + 1 # to account for possibility that lslr is not varying
-        update_param!(m,:lslr,lslr[idx_lslr,:,:])
+        update_param!(m,:lslr,lslr[i,:,:])
         res = run_ciam_mcs(m, 1, trial_params["t"], outfilepath, false)
         res1 = DataFrame([res.current_data])
         global outtrials = [outtrials;res1]
