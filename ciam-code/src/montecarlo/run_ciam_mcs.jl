@@ -17,14 +17,14 @@ output_dir: an output directory
 save_trials: whether to generate and save MC trial values to a file
 """
 
-function run_ciam_mcs(model,trials=10000,ntsteps=10,output_dir=nothing, save_trials=true)
+function run_ciam_mcs(model,trials=10000,ntsteps=10,output_dir=nothing, save_trials=true, vary_ciam=true)
     output_dir = output_dir === nothing ? joinpath(@__DIR__, "../../output/ciammcs", "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$trials") : output_dir
     mkpath("$output_dir/results")
 
     trials_output_filename = save_trials ?  joinpath("$output_dir/trials.csv") :  nothing
 
     # Get an instance of CIAM's mcs
-    mcs = getmcs()
+    mcs = getmcs(vary_ciam)
 
     # run monte carlo trials
     res = run(mcs, model, trials;

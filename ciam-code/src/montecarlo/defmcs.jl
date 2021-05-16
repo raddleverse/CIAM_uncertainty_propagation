@@ -19,6 +19,10 @@ ciam_fixed_mcs = @defsim begin
     wvpdl = TriangularDist(0.47,0.47,0.47)     # From Brander et al (2006)
 end
 
-function getmcs(dists=ciam_default_mcs)
-    return deepcopy(dists)
+function getmcs(vary_ciam)
+    if vary_ciam
+        return deepcopy(ciam_default_mcs)
+    else
+        return deepcopy(ciam_fixed_mcs)
+    end
 end
