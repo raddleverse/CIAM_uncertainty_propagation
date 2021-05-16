@@ -1,5 +1,5 @@
 
-function runTrials(rcp,trial_params,adaptRegime)
+function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true)
     #outfilepath = joinpath("/Volumes/MASTERS/ciammcs","CIAM$(Dates.format(now(), "yyyy-mm-dd HH-MM-SS"))MC$(trial_params["n"])Reg$(adaptRegime["regimeNum"])")
     outfilepath = "../../output"
     mkpath("$outfilepath/monteCarlo_results")
@@ -16,7 +16,15 @@ function runTrials(rcp,trial_params,adaptRegime)
     end
 
     # Load BRICK data
-    lsl = brick_lsl(rcp,segIDs,trial_params["brickfile"],trial_params["n"],trial_params["low"],trial_params["high"],trial_params["ystart"],trial_params["yend"],trial_params["tstep"],false)
+    if vary_slr
+        lsl = brick_lsl(rcp,segIDs,trial_params["brickfile"],trial_params["n"],trial_params["low"],trial_params["high"],trial_params["ystart"],trial_params["yend"],trial_params["tstep"],false)
+    else
+        if trial_params["low"]==trial_params["high"]
+            lsl = brick_lsl(rcp,segIDs,trial_params["brickfile"],1,trial_params["low"],trial_params["high"],trial_params["ystart"],trial_params["yend"],trial_params["tstep"],false)
+        else
+            error("Not varying SLR in Monte Carlo sampling, but the low and high quantiles requested are not equal.")
+        end
+    end
     lslr=lsl[1]
     gmsl=lsl[2]
     ensInds=lsl[3] # Indices of original BRICK array
@@ -32,7 +40,8 @@ function runTrials(rcp,trial_params,adaptRegime)
     globalNPV = zeros(num_ens)
     rgns=["USA"] # USA Seg IDs of interest
     for i=1:num_ens
-        update_param!(m,:lslr,lslr[i,:,:])
+        idx_lslr = i%size(lslr)[1] + 1 # to account for possibility that lslr is not varying
+        update_param!(m,:lslr,lslr[idx_lslr,:,:])
         res = run_ciam_mcs(m, 1, trial_params["t"], outfilepath, false)
         res1 = DataFrame([res.current_data])
         global outtrials = [outtrials;res1]

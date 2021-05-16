@@ -1,5 +1,3 @@
-# todo - monte carlo simulations with
-# 1) updated SLR projections (BRICK)
 
 cd("/Users/aewsma/codes/CIAM_adaptation_regimes/ciam-code/src")
 
@@ -22,7 +20,7 @@ include("processResults.jl")
 #   start and end year, timestep and number of timesteps
 trial_params=Dict(
     "brickfile" => "../data/lslr/BRICK_projections.RData",
-    "n" => 10,
+    "n" => 5,
     "high" => 97.5,
     "low" => 2.5,
     "ystart" => 2010,
@@ -50,4 +48,9 @@ txtfile=open("../data/batch/init.txt","w") do io
     write(io,textstr)
 end
 
-runTrials(85,trial_params,adaptRegime1)
+# vary SLR and CIAM parameters
+runTrials(85,trial_params,adaptRegime1,vary_slr=true,vary_ciam=true)
+
+# vary only CIAM parameters
+trial_params["low"] = trial_params["high"] = 50
+runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=true)
