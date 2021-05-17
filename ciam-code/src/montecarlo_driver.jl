@@ -25,7 +25,7 @@ include("processResults.jl")
 #   start and end year, timestep and number of timesteps
 trial_params=Dict(
     "brickfile" => "../data/lslr/BRICK_projections.RData",
-    "n" => 200,
+    "n" => 2500,
     "high" => 97.5,
     "low" => 2.5,
     "ystart" => 2010,
@@ -54,6 +54,8 @@ txtfile=open("../data/batch/init.txt","w") do io
 end
 
 # vary SLR and CIAM parameters
+trial_params["low"] = 2.5
+trial_params["high"] = 97.5
 runname = "SSP5_BRICK85_varySLR_varyCIAM"
 runTrials(85,trial_params,adaptRegime1,vary_slr=true,vary_ciam=true,runname=runname)
 
@@ -63,27 +65,28 @@ runname = "SSP5_BRICK85_varyCIAM"
 runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=true,runname=runname)
 
 # vary only BRICK parameters
-# TODO
-#runname = "SSP5_BRICK85_varyBRICK"
-#runTrials(85,trial_params,adaptRegime1,vary_slr=true,vary_ciam=false,runname=runname)
+trial_params["low"] = 2.5
+trial_params["high"] = 97.5
+runname = "SSP5_BRICK85_varyBRICK"
+runTrials(85,trial_params,adaptRegime1,vary_slr=true,vary_ciam=false,runname=runname)
 
 # only 5th percentile of SLR, with CIAM defaults
-# TODO
-#trial_params["low"] = trial_params["high"] = 5
-#runname = "SSP5_BRICK85_p05"
-#runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=false,runname=runname)
+trial_params["low"] = trial_params["high"] = 5
+trial_params["n"] = 1
+runname = "SSP5_BRICK85_p05"
+runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=false,runname=runname)
 
 # only 50th percentile of SLR, with CIAM defaults
-# TODO
-#trial_params["low"] = trial_params["high"] = 50
-#runname = "SSP5_BRICK85_p50"
-#runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=false,runname=runname)
+trial_params["low"] = trial_params["high"] = 50
+trial_params["n"] = 1
+runname = "SSP5_BRICK85_p50"
+runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=false,runname=runname)
 
 # only 95th percentile of SLR, with CIAM defaults
-# TODO
-#trial_params["low"] = trial_params["high"] = 95
-#runname = "SSP5_BRICK85_p95"
-#runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=false,runname=runname)
+trial_params["low"] = trial_params["high"] = 95
+trial_params["n"] = 1
+runname = "SSP5_BRICK85_p95"
+runTrials(85,trial_params,adaptRegime1,vary_slr=false,vary_ciam=false,runname=runname)
 
 ##==============================================================================
 ## End

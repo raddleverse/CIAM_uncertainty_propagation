@@ -5,7 +5,7 @@
 ## Modified code: Tony Wong (16 May 2021)
 ##==============================================================================
 
-function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true,runname=false)
+function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true,runname="")
     #outfilepath = joinpath("/Volumes/MASTERS/ciammcs","CIAM$(Dates.format(now(), "yyyy-mm-dd HH-MM-SS"))MC$(trial_params["n"])Reg$(adaptRegime["regimeNum"])")
     outfilepath = "../../output"
     mkpath("$outfilepath/monteCarlo_results")
@@ -32,7 +32,8 @@ function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true,run
             lsl = brick_lsl(rcp,segIDs,trial_params["brickfile"],1,trial_params["low"],trial_params["high"],trial_params["ystart"],trial_params["yend"],trial_params["tstep"],false)
             lslr=repeat(lsl[1],outer=(trial_params["n"],1,1))
             gmsl=repeat(lsl[2],outer=(1,trial_params["n"]))
-            ensInds=repeat(lsl[3],trial_params["n"])
+            # only 1 element coming back so `fill` instead of `repeat`
+            ensInds=fill(lsl[3],trial_params["n"])
         else
             error("Not varying SLR in Monte Carlo sampling, but the low and high quantiles requested are not equal.")
         end
@@ -60,19 +61,18 @@ function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true,run
     end
 
     # Write Trials, Global NPV and Time Series
-    if runname
-        outtrialsname="$(outfilepath)/results/trials_$(runname).csv"
-        outnpvname="$(outfilepath)/results/globalnpv_$(runname).csv"
-        outtsname="$(outfilepath)/results/globalts_$(rcp)_$(runname).csv"
-    else
+    if runname==""
         outtrialsname="$(outfilepath)/results/trials.csv"
         outnpvname="$(outfilepath)/results/globalnpv.csv"
         outtsname="$(outfilepath)/results/globalts_$(rcp).csv"
+    else
+        outtrialsname="$(outfilepath)/results/trials_$(runname).csv"
+        outnpvname="$(outfilepath)/results/globalnpv_$(runname).csv"
+        outtsname="$(outfilepath)/results/globalts_$(rcp)_$(runname).csv"
     end
 
     CSV.write(outtrialsname,outtrials)
     procGlobalOutput(globalNPV,gmsl,ensInds,trial_params["brickfile"],rcp,adaptRegime["noRetreat"],outnpvname)
-    outtsname="$(outfilepath)/results/globalts_$(rcp).csv"
     CSV.write(outtsname,outts)
 
 end
