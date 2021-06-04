@@ -31,7 +31,7 @@ txtfile=open("../data/batch/init.txt","w") do io
     write(io,textheader)
     write(io,textstr)
 end
-m = MimiCIAM.get_model(t=20,initfile="../data/batch/init.txt",fixed=fixed,noRetreat=noRetreat,allowMaintain=allowMaintain)
+m = MimiCIAM.get_model(t=15,initfile="../data/batch/init.txt",fixed=fixed,noRetreat=noRetreat,allowMaintain=allowMaintain)
 run(m)
 MimiCIAM.write_ciam(m; runname=runname, sumsegs="global", varnames=false)
 MimiCIAM.write_ciam(m; runname=runname, sumsegs="seg", varnames=false)

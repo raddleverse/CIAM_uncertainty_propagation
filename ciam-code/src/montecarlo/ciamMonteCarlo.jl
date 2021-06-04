@@ -46,9 +46,16 @@ function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true,run
                             allowMaintain=adaptRegime["allowMaintain"], popinput=adaptRegime["popval"])
 #    update_param!(m,:popinput,adaptRegime["popval"])
 
+    # get the segments and their corresponding World Bank regions
+    dfSR = CSV.read("../data/segments_regions_WB.csv", DataFrame)
+    dfSR[!,"ids"] = [parse(Int64,replace(i, r"[^0-9]"=> "")) for i in dfSR[!,"segments"]]
+    # unique World Bank regions
+    wbrgns = unique(dfSR[!,"global region"])
+
     global outtrials=DataFrame()
     global outts=DataFrame()
     globalNPV = zeros(num_ens)
+    regionNPV = zeros(num_ens, length(wbrgns))
     rgns=["USA"] # USA Seg IDs of interest
     for i=1:num_ens
         update_param!(m,:lslr,lslr[i,:,:])
@@ -58,22 +65,35 @@ function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true,run
         ts = MimiCIAM.getTimeSeries(m,i,rgns=false,sumsegs="global")
         global outts = [outts;ts]
         globalNPV[i] = m[:slrcost,:NPVOptimalTotal]
+        # get the segments for each region and aggregate
+        for rgn in wbrgns
+            segIDs_rgn = filter(:"global region" => ==(rgn), dfSR)[!,"ids"]
+            idx_rgn = findall(x -> x in segIDs_rgn, segIDs)
+            col_rgn = findfirst(x->x==rgn, wbrgns)
+            regionNPV[i,col_rgn] = sum(m[:slrcost,:NPVOptimal][idx_rgn])
+        end
     end
+    # get regional NPV as DataFrame for output
+    outregionNPV = DataFrame(regionNPV)
+    rename!(outregionNPV,wbrgns)
 
     # Write Trials, Global NPV and Time Series
     if runname==""
         outtrialsname="$(outfilepath)/results/trials.csv"
         outnpvname="$(outfilepath)/results/globalnpv.csv"
+        outrgnname="$(outfilepath)/results/regionnpv.csv"
         outtsname="$(outfilepath)/results/globalts_$(rcp).csv"
     else
         outtrialsname="$(outfilepath)/results/trials_$(runname).csv"
         outnpvname="$(outfilepath)/results/globalnpv_$(runname).csv"
+        outrgnname="$(outfilepath)/results/regionnpv_$(runname).csv"
         outtsname="$(outfilepath)/results/globalts_$(rcp)_$(runname).csv"
     end
 
     CSV.write(outtrialsname,outtrials)
     procGlobalOutput(globalNPV,gmsl,ensInds,trial_params["brickfile"],rcp,adaptRegime["noRetreat"],outnpvname)
     CSV.write(outtsname,outts)
+    CSV.write(outrgnname,outregionNPV)
 
 end
 
