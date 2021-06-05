@@ -49,6 +49,7 @@ function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true,run
     # get the segments and their corresponding World Bank regions
     dfSR = CSV.read("../data/segments_regions_WB.csv", DataFrame)
     dfSR[!,"ids"] = [parse(Int64,replace(i, r"[^0-9]"=> "")) for i in dfSR[!,"segments"]]
+
     # unique World Bank regions
     wbrgns = unique(dfSR[!,"global region"])
 
@@ -68,7 +69,7 @@ function runTrials(rcp,trial_params,adaptRegime;vary_slr=true,vary_ciam=true,run
         # get the segments for each region and aggregate
         for rgn in wbrgns
             segIDs_rgn = filter(:"global region" => ==(rgn), dfSR)[!,"ids"]
-            idx_rgn = findall(x -> x in segIDs_rgn, segIDs)
+            idx_rgn = findall(x -> x in segIDs_rgn, dfSR[!,"ids"])
             col_rgn = findfirst(x->x==rgn, wbrgns)
             regionNPV[i,col_rgn] = sum(m[:slrcost,:NPVOptimal][idx_rgn])
         end
