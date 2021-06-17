@@ -277,62 +277,6 @@ prob_segs <- c(psegs)
 
 outdf_10_50_new2 <- outdf_10_50_new %>% filter(!(ciamID %in% prob_segs))
 
-
-compute_seg_v2 <- function(segname,years,df){
-  seg_diva<-diva_lines[diva_lines$ciamID ==segname,]
-  seg2 <- st_polygonize(seg_diva)
-  seg2 <- as(seg2,"Spatial")
-  plot(seg2)
-  crs(seg2)<- "+proj=longlat"
-  
-  arval<- area(seg2)/1e6
-  p_m10 <- crop(ssp_2010m, seg2)
-  p_j10 <- crop(ssp_2010j,seg2)
-  p_m20 <- crop(ssp_2020m, seg2)
-  p_j20 <- crop(ssp_2020j,seg2)
-  p_m20 <- mask(p_m20,seg2)
-  p_j20 <- mask(p_j20,seg2)
-  p_m10 <- mask(p_m10,seg2)
-  p_j10 <- mask(p_j10,seg2)
-  
-  p_m30<- crop(ssp_2030m, seg2)
-  p_j30<- crop(ssp_2030j, seg2)
-  p_m30<- mask(p_m30,seg2)
-  p_j30<- mask(p_j30,seg2)
-  
-  p_m40<- crop(ssp_2040m, seg2)
-  p_j40<- crop(ssp_2040j, seg2)
-  p_m40<- mask(p_m40,seg2)
-  p_j40<- mask(p_j40,seg2)
-  
-  p_m50<- crop(ssp_2050m, seg2)
-  p_j50<- crop(ssp_2050j, seg2)
-  p_m50<- mask(p_m50,seg2)
-  p_j50<- mask(p_j50,seg2)
-  
-  jvars <- c("p_j10","p_j20","p_j30","p_j40","p_j50")
-  pvars <- c("p_m10","p_m20","p_m30","p_m40","p_m50")
-  for (y in 1:length(years)){
-    year <- years[y]
-    pvar <- get(pvars[y])
-    jvar=get(jvars[y])
-    
-    
-    if (sum(area_seg@data@values,na.rm = T)==0){}
-    else{
-      pop_val_j <- sum(jvar@data@values,na.rm=T)
-      pop_val_m <- sum(pvar@data@values,na.rm=T)
-      tmp1 <- data.frame(segID=seg2@data$segID,year=year, areaKm2=arval,
-                         pop_jones = pop_val_j, pop_merkens = pop_val_m, 
-                         popdens_jones = pop_val_j/arval,
-                         popdens_merkens = pop_val_m/arval, 
-                         popdens_old = seg2@data$popdens_old,ciamID=seg2@data$ciamID)
-      
-      df <- rbind(df,tmp1)
-    }}
-  return(df)
-}
-
 tmp <- data.frame()
 
 ### Other Issue Segs
@@ -344,6 +288,7 @@ iss_df4 <- outdf %>% filter(popdens_old==0,popdens_jones>20)
 iss_segs <- c(iss_segs,unique(iss_df$ciamID),unique(iss_df2$ciamID),unique(iss_df3$ciamID),unique(iss_df4$ciamID))%>% unique()
 
 for (i in iss_segs){
+  
   try({ tmp <- compute_seg_v2(i,years,tmp)})
 }
 
@@ -512,8 +457,8 @@ for (i in unique(nonpoly_names)){
 # ID duplicate segments
 dupes <- c()
 for (i in ciam_Names) {
-  for (year in years) { # TW: added - okay?
-    tmp <- outdf %>% filter(year==year,ciamID==i) # TW: changed from 2010 (or 2060; first year in years) - okay?
+  for (year in years) {
+    tmp <- outdf %>% filter(year==year,ciamID==i)
     if (nrow(tmp)>1){
       dupes <- c(dupes,i)
     }
@@ -538,38 +483,37 @@ for (i in dupes){
   area_seg <- crop(area_data,seg2)
   area_seg <- mask(area_seg,seg2)
   
-  p_m10 <- crop(ssp_2010m, seg2)
-  p_j10 <- crop(ssp_2010j,seg2)
-  p_m20 <- crop(ssp_2020m, seg2)
-  p_j20 <- crop(ssp_2020j,seg2)
-  p_m20 <- mask(p_m20,seg2)
-  p_j20 <- mask(p_j20,seg2)
-  p_m10 <- mask(p_m10,seg2)
-  p_j10 <- mask(p_j10,seg2)
+  p_m60 <- crop(ssp_2060m, seg2)
+  p_j60 <- crop(ssp_2060j,seg2)
+  p_m70 <- crop(ssp_2070m, seg2)
+  p_j70 <- crop(ssp_2070j,seg2)
+  p_m70 <- mask(p_m70,seg2)
+  p_j70 <- mask(p_j70,seg2)
+  p_m60 <- mask(p_m60,seg2)
+  p_j60 <- mask(p_j60,seg2)
   
-  p_m30<- crop(ssp_2030m, seg2)
-  p_j30<- crop(ssp_2030j, seg2)
-  p_m30<- mask(p_m30,seg2)
-  p_j30<- mask(p_j30,seg2)
+  p_m80<- crop(ssp_2080m, seg2)
+  p_j80<- crop(ssp_2080j, seg2)
+  p_m80<- mask(p_m80,seg2)
+  p_j80<- mask(p_j80,seg2)
   
-  p_m40<- crop(ssp_2040m, seg2)
-  p_j40<- crop(ssp_2040j, seg2)
-  p_m40<- mask(p_m40,seg2)
-  p_j40<- mask(p_j40,seg2)
+  p_m90<- crop(ssp_2090m, seg2)
+  p_j90<- crop(ssp_2090j, seg2)
+  p_m90<- mask(p_m90,seg2)
+  p_j90<- mask(p_j90,seg2)
   
-  p_m50<- crop(ssp_2050m, seg2)
-  p_j50<- crop(ssp_2050j, seg2)
-  p_m50<- mask(p_m50,seg2)
-  p_j50<- mask(p_j50,seg2)
+  p_m100<- crop(ssp_2100m, seg2)
+  p_j100<- crop(ssp_2100j, seg2)
+  p_m100<- mask(p_m100,seg2)
+  p_j100<- mask(p_j100,seg2)
   
-  jvars <- c("p_j10","p_j20","p_j30","p_j40","p_j50")
-  pvars <- c("p_m10","p_m20","p_m30","p_m40","p_m50")
-  yrs <- c(2010,2020,2030,2040,2050)
+  jvars <- c("p_j60","p_j70","p_j80","p_j90","p_j100")
+  pvars <- c("p_m60","p_m70","p_m80","p_m90","p_m100")
+  yrs <- c(2060,2070,2080,2090,2100)
   for (y in 1:length(yrs)){
     year <- yrs[y]
     pvar <- get(pvars[y])
     jvar=get(jvars[y])
-    
     
     if (sum(area_seg@data@values,na.rm = T)==0){}
     else{outdf2 <- computeAvgPopdens(seg2,jvar,pvar,area_seg,outdf2,year)}
@@ -582,15 +526,16 @@ for (i in dupes){
 redupe_segs <- unique(outdf2$ciamID)
 excl3 <- dupes[!(dupes %in% redupe_segs)]
 
-outdf_10_50_new <- outdf %>% filter(!(ciamID %in% dupes))
-outdf_10_50_new <- rbind(outdf_10_50_new,outdf2)
+outdf_60_100_new <- outdf %>% filter(!(ciamID %in% dupes))
+outdf_60_100_new <- rbind(outdf_60_100_new,outdf2)
 
-psegs <- ciam_Names[!(ciam_Names%in%unique(outdf_10_50_new$ciamID))]
+psegs <- ciam_Names[!(ciam_Names%in%unique(outdf_60_100_new$ciamID))]
 prob_segs <- c(psegs)
 
-outdf_10_50_new2 <- outdf_10_50_new %>% filter(!(ciamID %in% prob_segs))
+outdf_60_100_new2 <- outdf_60_100_new %>% filter(!(ciamID %in% prob_segs))
 
 # this function doesn't need to be defined again - put in a separate file to source
+#DON'T RUN THIS YET UNTIL YOU SORT OUT THE YEARS HARDCODING ISSUE IN THERE
 #compute_seg_v2 <- function(segname,years,df){
 
 tmp <- data.frame()
@@ -612,8 +557,6 @@ for (i in iss_segs2){
   try({ tmp <- compute_seg_v3(i,years,tmp)})
   
 }
-
-
 
 outdf_new <- outdf %>% filter(!(ciamID %in% iss_segs))
 outdf_new <- rbind(outdf_new,tmp)
@@ -659,22 +602,22 @@ area_seg <- crop(area_data,seg2)
 area_seg <- mask(area_seg,seg2)
 areaval <- sum(area_seg@data@values,na.rm=T)
 
-p10m <- crop(ssp_2010m,seg2)
-p10m <- mask(p10m,seg2)
-p20m <- crop(ssp_2020m,seg2)
-p20m <- mask(p20m,seg2)
-p30m <- crop(ssp_2030m,seg2)
-p30m <- mask(p30m,seg2)
-p40m <- crop(ssp_2040m,seg2)
-p40m <- mask(p40m,seg2)
-p50m <- crop(ssp_2050m,seg2)
-p50m <- mask(p50m,seg2)
+p60m <- crop(ssp_2060m,seg2)
+p60m <- mask(p60m,seg2)
+p70m <- crop(ssp_2070m,seg2)
+p70m <- mask(p70m,seg2)
+p80m <- crop(ssp_2080m,seg2)
+p80m <- mask(p80m,seg2)
+p90m <- crop(ssp_2090m,seg2)
+p90m <- mask(p90m,seg2)
+p100m <- crop(ssp_2100m,seg2)
+p100m <- mask(p100m,seg2)
 
-pop10<-sum(p10m@data@values,na.rm=T)
-pop20<-sum(p20m@data@values,na.rm=T)
-pop30<-sum(p30m@data@values,na.rm=T)
-pop40<-sum(p40m@data@values,na.rm=T)
-pop50<-sum(p50m@data@values,na.rm=T)
+pop60<-sum(p60m@data@values,na.rm=T)
+pop70<-sum(p70m@data@values,na.rm=T)
+pop80<-sum(p80m@data@values,na.rm=T)
+pop90<-sum(p90m@data@values,na.rm=T)
+pop100<-sum(p100m@data@values,na.rm=T)
 
 for (y in years){
   tmp1 <- data.frame(segID=seg2@data$segID,year=y, areaKm2=areaval,
@@ -684,6 +627,5 @@ for (y in years){
                      popdens_old = seg2@data$popdens_old,ciamID=seg2@data$ciamID)
   outdf_fin<- rbind(outdf_fin,tmp1)
 }
-
 
 write_csv(outdf_fin,outname)
