@@ -21,6 +21,9 @@ library(rgdal)
 library(tidyverse)
 library(rnaturalearth)
 
+# set which SSP you want (1-5)
+SSP <- 5
+
 setwd("/Users/aewsma/codes/CIAM_adaptation_regimes/R-code")
 source("proc_Diva_pop_data.R")
 
@@ -57,8 +60,6 @@ diva_lines <- diva_lines %>% mutate(ciamID=ifelse(segID=="Indonesia3287","Indone
 area_data <- raster("/Users/aewsma/codes/CIAM-Work/code/CIAM-GIS/GPW-LANDAREA-30/gpw-v4-land-water-area-rev11_landareakm_30_sec_tif/gpw_v4_land_water_area_rev11_landareakm_30_sec.tif")
 
 # Read Merkens Data 
-SSP <- 1
-
 ssp_2060m <- raster(paste0("/Users/aewsma/codes/CIAM-Work/code/CIAM-GIS/POPDATA/MERKENS_2016/DIVA_SSP",SSP,"_2060.tif"))
 ssp_2070m <- raster(paste0("/Users/aewsma/codes/CIAM-Work/code/CIAM-GIS/POPDATA/MERKENS_2016/DIVA_SSP",SSP,"_2070.tif"))
 ssp_2080m <- raster(paste0("/Users/aewsma/codes/CIAM-Work/code/CIAM-GIS/POPDATA/MERKENS_2016/DIVA_SSP",SSP,"_2080.tif"))
