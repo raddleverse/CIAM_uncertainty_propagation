@@ -39,7 +39,7 @@ trial_params=Dict(
 adaptRegime1=Dict(
     "allowMaintain"=>false,
     "noRetreat"=>false,
-    "popval"=>1,
+    "popval"=>1, # 0 = original, 1 = Jones and O'Neill 2016, 2 = Merkens et al 2016
     "fixed"=>true,
     "SSP" => "IIASAGDP_SSP5_v9_130219",
     "SSP_simp" => 5, # won't matter for SSP 0 (old population data) case
