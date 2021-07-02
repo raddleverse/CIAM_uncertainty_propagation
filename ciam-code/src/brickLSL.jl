@@ -5,16 +5,26 @@
 ## Original code: Catherine Ledna (18 Mar 2020)
 ## Modified code: Tony Wong (16 May 2021)
 ##==============================================================================
+using Query
+using CSV
+using NetCDF
+using RData
+using StatsBase
 
+"""
+    get_fingerprints()
 
-# Retrieve BRICK fingerprints from NetCDF file
+Retrieve BRICK fingerprints from NetCDF file - will download the file to a 
+folder `temporary` that will not be uploaded to github (using .gitignore)
+"""
 function get_fingerprints()
-    if !isfile("../data/lslr/FINGERPRINTS_SLANGEN_Bakker.nc")
+    
+    fp_file = joinpath(@__DIR__, "..", "data", "temporary", "FINGERPRINTS_SLANGEN_Bakker.nc")
+    if !isfile(fp_file)
         url = "https://github.com/scrim-network/BRICK/raw/master/fingerprints/FINGERPRINTS_SLANGEN_Bakker.nc"
-        download(url, "../data/lslr/FINGERPRINTS_SLANGEN_Bakker.nc")
+        download(url, fp_file)
     end
 
-    fp_file = "../data/lslr/FINGERPRINTS_SLANGEN_Bakker.nc"
     fplat = ncread(fp_file,"lat")
     fplon = ncread(fp_file,"lon")
     fpAIS = ncread(fp_file,"AIS")
@@ -25,9 +35,13 @@ function get_fingerprints()
     return fplat,fplon,fpAIS,fpGSIC,fpGIS
 end
 
-# Get brick ensemble members for specified RCP from NetCDF file
-# Returns time x ens arrays for brick components
-function get_brickGMSL_netcdf(gmslfile,rcp)
+"""
+    get_brickGMSL_netcdf(gmslfile::String, rcp::Union{String, Number})
+
+Get brick ensemble members for specified RCP from NetCDF file
+Returns time x ens arrays for brick components
+"""
+function get_brickGMSL_netcdf(gmslfile::String, rcp::Union{String, Number})
 
     brAIS= ncread(gmslfile,"AIS_RCP$(rcp)")
     brGSIC = ncread(gmslfile,"GSIC_RCP$(rcp)")
@@ -42,14 +56,19 @@ function get_brickGMSL_netcdf(gmslfile,rcp)
 
 end
 
-# Get brick ensemble members for specified RCP from RData file
-# Returns time x ens arrays for brick components
-function get_brickGMSL_rdata(gmslfile,rcp)
+"""
+    get_brickGMSL_rdata(gmslfile::String, rcp::Union{String, Number})
+
+Get brick ensemble members for specified RCP from RData file and return time x ens 
+arrays for brick components
+"""
+function get_brickGMSL_rdata(gmslfile::String, rcp::Union{String, Number})
 
     if !isfile(gmslfile)
         url = "https://zenodo.org/record/3628215/files/sample_projections.RData"
         download(url, gmslfile)
     end
+
     brick = RData.load(gmslfile)
     brAIS = brick["ais.rcp$(rcp)"]
     brGSIC = brick["gic.rcp$(rcp)"]
@@ -63,31 +82,42 @@ function get_brickGMSL_rdata(gmslfile,rcp)
 
 end
 
-# Get CIAM lonlat tuples for specified segIDs
-# segID order does not matter; will sort tuples alphabetically by segment name
+"""
+    get_lonlat(segIDs)
+
+Get CIAM lonlat tuples for specified segIDs, segID order does not matter; will sort 
+tuples alphabetically by segment name
+"""
+# 
 function get_lonlat(segIDs)
+
     ciamlonlat = CSV.read(joinpath(@__DIR__,"..","data","diva_segment_latlon.csv"), DataFrame)
 
-    if segIDs==false
+    if segIDs == false
         filt = DataFrame(ciamlonlat)
     else
         filt = ciamlonlat |> @filter(_.segid in segIDs) |> DataFrame
     end
 
-    sort!(filt, [:segments])
+    sort!(filt, :segments)
     lons = filt.longi
     lats = filt.lati
 
     return collect(zip(lons,lats))
 end
 
-# Choose n ensemble members randomly within specified percentile range
-# if percentile range is one number, will return that percentile (with respect to GMSL in specified year)
-# time - BRICK time vector from netcdf
-# ens - BRICK GMSL matrix, time x num ensembles
-# low - minimum percentile threshold (integer - e.g. 5 = 5th percentile)
-# high - maximum percentile threshold
+"""
+    choose_ensemble_members(time, ens, n, low, high, yend, ensInds)
+
+Choose n ensemble members randomly within specified percentile range
+if percentile range is one number, will return that percentile (with respect to GMSL in specified year)
+time - BRICK time vector from netcdf
+ens - BRICK GMSL matrix, time x num ensembles
+low - minimum percentile threshold (integer - e.g. 5 = 5th percentile)
+high - maximum percentile threshold
+"""
 function choose_ensemble_members(time, ens, n, low, high, yend, ensInds)
+
     if length(time)==size(ens)[1]
         end_year = findall(x -> x==yend, time)[1]
 
@@ -137,13 +167,17 @@ function choose_ensemble_members(time, ens, n, low, high, yend, ensInds)
     end
 end
 
-# downscale_brick: downscale BRICK gmsl to lsl for all segments and ensembles of interest
-# Input:
-# brickcomps - BRICK components (time x ens matrices corresponding to brick gmsl components)
-# lonlat - vector of (lon,lat) tuples, sorted corresp to segment name alphabetical order
-# Output:
-# lsl_out: ens x time x segment array of local sea levels, sorted in alphabetical order by segment name
-# GMSL: global mean sea levels corresponding to local sea level arrays (time x ens)
+"""
+    downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tstep=10)
+Downscale BRICK gmsl to lsl for all segments and ensembles of interest with the
+input arguments:
+
+brickcomps - BRICK components (time x ens matrices corresponding to brick gmsl components)
+lonlat - vector of (lon,lat) tuples, sorted corresp to segment name alphabetical order
+Output:
+lsl_out: ens x time x segment array of local sea levels, sorted in alphabetical order by segment name
+GMSL: global mean sea levels corresponding to local sea level arrays (time x ens)
+"""
 function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tstep=10)
     # To do - check with vectors of lat, lon
     (fplat,fplon,fpAIS,fpGSIC,fpGIS) = get_fingerprints()
@@ -275,7 +309,11 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
     return lsl_out,GMSL
 end
 
-# Driver function to downscale BRICK gmsl for specified segments
+"""
+    brick_lsl(rcp,segIDs,brickfile,n,low=5,high=95,ystart=2010,yend=2100,tstep=10,ensInds=false)
+
+Driver function to downscale BRICK gmsl for specified segments
+"""
 function brick_lsl(rcp,segIDs,brickfile,n,low=5,high=95,ystart=2010,yend=2100,tstep=10,ensInds=false)
     # HERE - if you want to use a different set of SLR projections, or projections
     # that are stored in a different format, a new get_brickGMSL_xxx might be needed
@@ -288,91 +326,7 @@ function brick_lsl(rcp,segIDs,brickfile,n,low=5,high=95,ystart=2010,yend=2100,ts
     return lsl,gmsl,brickEnsInds
 end
 
-function brickCIAM_driver(rcp,brickfile,n,low=5,high=95,ystart=2010,yend=2100,tstep=10,noRetreat=false,ens_Inds=false)
-
-    # Get segIDs from initfile pre-specified subset
-    ciamparams = MimiCIAM.init()
-    if ciamparams["subset"][1]==false
-        segIDs=false
-    else
-        subs = MimiCIAM.load_subset(ciamparams["subset"])
-        sort!(subs)
-        segIDs = MimiCIAM.segStr_to_segID(subs)
-    end
-
-    (lsl, gmsl,ensInds) = brick_lsl(rcp,segIDs,brickfile,n,low,high,ystart,yend,tstep,ens_Inds)
-    num_ens = n
-
-    if yend==2100
-        t=10
-    elseif yend==2200
-        t=20
-    elseif yend <2200 && yend >= 2010
-        yend = round(yend/10)*10
-        years = collect(ystart:tstep:yend)
-        t = length(years)
-    else
-        println("Error: end year exceeds CIAM bounds.")
-        return nothing
-    end
-
-    # Set up CIAM using init.txt defaults for SSP and subsets
-    m = MimiCIAM.get_model(t=t,noRetreat=noRetreat)
-    globalNPV = zeros(n)
-    globalWetlandLoss = zeros(n)
-    globalDrylandLoss = zeros(n)
-    globalStormLoss = zeros(n)
-
-    segNpv=zeros(n,12148)
-    segOption2100=zeros(n,12148)
-    segLevel2100=zeros(n,12148)
-    segLevel2050=zeros(n,12148)
-    segOption2050=zeros(n,12148)
-   # lsl2050 = zeros(n,12148)
-   # lsl2100 = zeros(n,12148)
-
-    # segWetland=zeros(12148,n)
-    # segStormPop=zeros(12148,n)
-    # segStormCap=zeros(12148,n)
-    # segConstruct=zeros(12148,n)
-    # segFlood=zeros(12148,n)
-    # segRelocate=zeros(12148,n)
-
-
-    for i in 1:n
-        update_param!(m, :lslr, lsl[i,:,:])
-        run(m)
-        # store output
-        globalNPV[i] = m[:slrcost,:NPVOptimalTotal]
-     #   globalWetlandLoss[i]= sum(m[:slrcost,:WetlandAreaOptimal][t,:])
-     #   globalDrylandLoss[i] = sum(m[:slrcost,:DryLandLossOptimal][t,:])
-     #   globalStormLoss[i] = sum(m[:slrcost,:StormLossOptimal][t,:])
-
-        segNpv[i,:]=m[:slrcost,:NPVOptimal]
-        segOption2050[i,:]=m[:slrcost,:OptimalOption][5,:]
-        segLevel2050[i,:]=m[:slrcost,:OptimalLevel][5,:]
-        segOption2100[i,:]=m[:slrcost,:OptimalOption][10,:]
-        segLevel2100[i,:]=m[:slrcost,:OptimalLevel][10,:]
-      #  lsl2050[i,:] = m[:slrcost, :lslr][5,:]
-      #  lsl2100[i,:] = m[:slrcost,:lslr][10,:]
-
-        # To do - NPV for these vars (Friday-ish)
-        # segWetland[:,i]=transpose(sum(m[:slrcost,:OptimalWetland],dims=1))
-        # segStormPop[:,i]=transpose(sum(m[:slrcost,:OptimalStormPop],dims=1))
-        # segStormCap[:,i]=m[:slrcost,:OptimalStormCapital]
-        # segConstruct[:,i]=m[:slrcost,:OptimalConstruct]
-        # segFlood[:,i]=m[:slrcost,:OptimalFlood]
-        # segRelocate[:,i]=m[:slrcost,:OptimalRelocate]
-
-    end
-    results_global = (globalNPV)#,globalWetlandLoss,globalDrylandLoss,globalStormLoss)
-    #results_seg = (segNpv,segOption,segLevel,segWetland,segStormPop,segStormCap,segConstruct,segFlood,segRelocate)
-    results_seg = (segNpv,segOption2050,segLevel2050,segOption2100,segLevel2100)
-
-    return results_global,results_seg,gmsl,ensInds
-end
-
-
+## Helper Functions
 
 function adder(maxval)
     function y(point,n)

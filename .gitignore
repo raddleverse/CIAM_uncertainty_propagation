@@ -1,4 +1,5 @@
 .DS_Store
 output
+ciam-code/data/temporary*
 brick_download_read.ipynb
 BRICK_projections.RData
