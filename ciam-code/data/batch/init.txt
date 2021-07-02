@@ -1,2 +1,0 @@
-run_name,lslr,subset,ssp,ssp_simplified
-base,lsl_rcp85_p50.csv,false,0,2
