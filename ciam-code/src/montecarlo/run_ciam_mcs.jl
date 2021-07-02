@@ -16,7 +16,7 @@ Run a Monte Carlo simulation with the CIAM model over its distributional paramet
 - save_trials: whether to generate and save MC trial values to a file
 """
 
-function run_ciam_mcs(model, output_dir, trials=10000, ntsteps=10, save_trials=true, vary_ciam=true)
+function run_ciam_mcs(model, output_dir; trials=10000, ntsteps=10, save_trials=true, vary_ciam=true)
 
     # unique output directory
     output_dir = joinpath(output_dir, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$trials")

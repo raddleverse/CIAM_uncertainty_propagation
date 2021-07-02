@@ -5,11 +5,35 @@
 ## Tony Wong (aewsma@rit.edu)
 ##==============================================================================
 
+using Mimi
 using MimiCIAM
 using CSV
 using RData
+using DataFrames 
 
 include("brickLSL.jl")
+
+# Note that this file uses some built in MimiCIAM functions which you may want
+# to copy with a new function name and modify if they do not suit your needs. They are
+# displayed below for convenience, but also found in the MimiCIAM package utils.jl
+
+# function write_init_file(run_name::String, outputdir::String, init_settings::Dict)
+#     textheader="run_name,lslr,subset,ssp,ssp_simplified\n"
+#     textstr = "$(run_name),$(init_settings[:lslrfile]),$(init_settings[:subset]),$(init_settings[:ssp]),$(init_settings[:ssp_simplified])"
+#     txtfile = open(joinpath(outputdir, init_settings[:init_filename]),"w") do io
+#         write(io,textheader)
+#         write(io,textstr)
+#     end
+# end
+
+# function write_output_files(m, outputdir::String, run_name::String)
+#     println("Writing out ciam `subsegs = seg` file for run $(run_name) to directory $(outputdir)")
+#     MimiCIAM.write_ciam(m; outputdir = outputdir, runname = run_name, sumsegs="seg", varnames=false)
+#     println("Writing out ciam `subsegs = global` file for run $(run_name) to directory $(outputdir)")
+#     MimiCIAM.write_ciam(m; outputdir = outputdir, runname = run_name, sumsegs="global", varnames=false)
+#     println("Writing out optimal costs file for run $(run_name) to directory $(outputdir)")
+#     MimiCIAM.write_optimal_costs(m; outputdir = outputdir, runname = run_name)
+# end
 
 ##==============================================================================
 ## Setup
@@ -63,7 +87,6 @@ model_settings = Dict(
     :GAMSmatch      => true
 )
 
-# write files
 MimiCIAM.write_init_file(run_name, outputdir, init_settings)
 
 m = MimiCIAM.get_model(
@@ -226,11 +249,11 @@ m = MimiCIAM.get_model(
 
 segIDs = get_segIDs(init_settings[:subset])
 rcp = 85
-lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
+lsl = brick_lsl(rcp, segIDs, brickfile, 1, 50, 50, 2010, 2150, 10, false) # end_year here only for picking median SLR ensemble member
 lslr = lsl[1] 
 gmsl = lsl[2] # unused
 ensInds = lsl[3] # Indices of original BRICK array (unused)
-update_param!(m,:lslr,lslr[1,:,:])
+update_param!(m, :slrcost, :lslr, lslr[1,:,:])
 
 run(m)
 
@@ -276,7 +299,7 @@ lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here
 lslr=lsl[1]
 gmsl=lsl[2] # unused
 ensInds=lsl[3] # Indices of original BRICK array (unused)
-update_param!(m,:lslr,lslr[1,:,:])
+update_param!(m, :slrcost, :lslr, lslr[1,:,:])
 
 run(m)
 
@@ -322,7 +345,7 @@ lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here
 lslr=lsl[1]
 gmsl=lsl[2]
 ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m,:lslr,lslr[1,:,:])
+update_param!(m, :slrcost, :lslr, lslr[1,:,:])
 
 run(m)
 
@@ -369,7 +392,7 @@ lsl = brick_lsl(rcp,segIDs,brickfile,1,5,5,2010,2150,10,false) # end_year here o
 lslr=lsl[1]
 gmsl=lsl[2]
 ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m, :lslr, lslr[1,:,:])
+update_param!(m, :slrcost, :lslr, lslr[1,:,:])
 
 run(m)
 
@@ -415,7 +438,7 @@ lsl = brick_lsl(rcp,segIDs,brickfile,1,95,95,2010,2150,10,false) # end_year here
 lslr=lsl[1]
 gmsl=lsl[2]
 ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m, :lslr, lslr[1,:,:])
+update_param!(m, :slrcost, :lslr, lslr[1,:,:])
 
 run(m)
 

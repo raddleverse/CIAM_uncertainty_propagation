@@ -6,7 +6,6 @@
 ##==============================================================================
 
 # Functions to process CIAM data and make plots
-#include("ciamhelper.jl") # already included in MimiCIAM package - shouldn't need, but we'll see how this goes
 
 function procGlobalOutput(glob,gmsl,inds,brickfile,rcp,noRetreat,outfile=false,tstart=2010,tend=2100)
 

@@ -13,40 +13,42 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
     # Output Files: Trials, NPV, Global Time Series, Regional Spotlight
 
     # Load CIAM parameters from file
-    if trial_params["subset"][1]==false
-        segIDs=false
+    if trial_params[:subset] == false
+        segIDs = false
     else
-        subs = MimiCIAM.load_subset(trial_params["subset"])
+        subs = MimiCIAM.load_subset(adaptRegime[:subset])
         sort!(subs)
         segIDs = MimiCIAM.segStr_to_segID(subs)
     end
 
     # Load BRICK data
     if vary_slr
-        lsl     = brick_lsl(rcp,segIDs,trial_params["brickfile"],trial_params["n"],trial_params["low"],trial_params["high"],trial_params["ystart"],trial_params["yend"],trial_params["tstep"],false)
+        lsl = brick_lsl(rcp, segIDs, trial_params[:brickfile], trial_params[:n],
+                        trial_params[:low], trial_params[:high],trial_params[:ystart],
+                        trial_params[:yend], trial_params[:tstep], false)
         lslr    =lsl[1]
         gmsl    =lsl[2]
         ensInds =lsl[3] # Indices of original BRICK array
+        
+    elseif trial_params[:low] == trial_params[:high]
+        lsl = brick_lsl(rcp, segIDs, trial_params[:brickfile], 1, trial_params[:low],
+                        trial_params[:high],trial_params[:ystart], trial_params[:yend], 
+                        trial_params[:tstep], false)
+
+        lslr = repeat(lsl[1],outer=(trial_params[:n], 1, 1))
+        gmsl = repeat(lsl[2], outer = (1,trial_params[:n]))
+        ensInds = fill(lsl[3],trial_params[:n]) # only 1 element coming back so `fill` instead of `repeat`
 
     else
-        if trial_params["low"] == trial_params["high"]
-            lsl = brick_lsl(rcp,segIDs,trial_params["brickfile"],1,trial_params["low"],trial_params["high"],trial_params["ystart"],trial_params["yend"],trial_params["tstep"],false)
-            lslr = repeat(lsl[1],outer=(trial_params["n"],1,1))
-            gmsl = repeat(lsl[2],outer=(1,trial_params["n"]))
-            ensInds=fill(lsl[3],trial_params["n"]) # only 1 element coming back so `fill` instead of `repeat`
- 
-        else
-            error("Not varying SLR in Monte Carlo sampling, but the low and high quantiles requested are not equal.")
-            
-        end
+        error("Not varying SLR in Monte Carlo sampling, but the low and high quantiles requested are not equal.")
     end
 
-    num_ens=trial_params["n"]
+    num_ens=trial_params[:n]
 
-    m = MimiCIAM.get_model(t=trial_params["t"], initfile=init_filepath,
-                            fixed=adaptRegime["fixed"],noRetreat=adaptRegime["noRetreat"],
-                            allowMaintain=adaptRegime["allowMaintain"], popinput=adaptRegime["popval"])
-#    update_param!(m,:popinput,adaptRegime["popval"])
+    m = MimiCIAM.get_model(t = adaptRegime[:t], initfile = init_filepath,
+                            fixed = adaptRegime[:fixed], noRetreat = adaptRegime[:noRetreat],
+                            allowMaintain = adaptRegime[:allowMaintain], popinput = adaptRegime[:popval])
+#    update_param!(m,:popinput,adaptRegime[:popval])
 
     # get the segments and their corresponding World Bank regions
     dfSR = CSV.read("../data/segments_regions_WB.csv", DataFrame)
@@ -62,9 +64,9 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
     rgns=["USA"] # USA Seg IDs of interest
 
     for i = 1:num_ens
-        update_param!(m,:lslr,lslr[i,:,:])
+        update_param!(m,:slrcost, :lslr,lslr[i,:,:])
 
-        res = run_ciam_mcs(m outputdir; trials = 1000, ntsteps = trial_params["t"], save_trials = false, vary_ciam = vary_ciam)
+        res = run_ciam_mcs(m, outputdir; trials = 1000, ntsteps = trial_params[:t], save_trials = false, vary_ciam = vary_ciam)
         res1 = DataFrame([res.current_data])
 
         global outtrials = [outtrials;res1]
@@ -96,7 +98,7 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
     outtsname= joinpath(postprocessing_outputdir, "globalts_$(rcp)_$(runname).csv")
 
     CSV.write(outtrialsname, outtrials)
-    procGlobalOutput(globalNPV,gmsl,ensInds,trial_params["brickfile"],rcp,adaptRegime["noRetreat"],outnpvname)
+    procGlobalOutput(globalNPV,gmsl,ensInds,trial_params[:brickfile],rcp,adaptRegime[:noRetreat],outnpvname)
     CSV.write(outtsname, outts)
     CSV.write(outrgnname, outregionNPV)
 

@@ -10,6 +10,10 @@ using CSV
 using NetCDF
 using RData
 using StatsBase
+using DataFrames
+
+##==============================================================================
+## Supporting Functions to Downscale BRICK from GMSL to LSL
 
 """
     get_fingerprints()
@@ -88,7 +92,6 @@ end
 Get CIAM lonlat tuples for specified segIDs, segID order does not matter; will sort 
 tuples alphabetically by segment name
 """
-# 
 function get_lonlat(segIDs)
 
     ciamlonlat = CSV.read(joinpath(@__DIR__,"..","data","diva_segment_latlon.csv"), DataFrame)
@@ -96,7 +99,7 @@ function get_lonlat(segIDs)
     if segIDs == false
         filt = DataFrame(ciamlonlat)
     else
-        filt = ciamlonlat |> @filter(_.segid in segIDs) |> DataFrame
+        filt = ciamlonlat |> @filter(_.segid in segIDs) |> Datarame
     end
 
     sort!(filt, :segments)
@@ -326,7 +329,8 @@ function brick_lsl(rcp,segIDs,brickfile,n,low=5,high=95,ystart=2010,yend=2100,ts
     return lsl,gmsl,brickEnsInds
 end
 
-## Helper Functions
+##==============================================================================
+## Small Helper Functions
 
 function adder(maxval)
     function y(point,n)
