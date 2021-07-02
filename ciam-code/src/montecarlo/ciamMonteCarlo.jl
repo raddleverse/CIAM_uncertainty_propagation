@@ -5,11 +5,11 @@
 ## Modified code: Tony Wong (16 May 2021)
 ##==============================================================================
 
-function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; vary_slr = true, vary_ciam=true, runname="")
+function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; vary_slr = true, vary_ciam=true, runname="default_run")
 
-    outputdir = joinpath(outputdir, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$trials")
+    outputdir = joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$trials")
     isdir(outputdir) || mkdir(outputdir)
-
+    
     # Output Files: Trials, NPV, Global Time Series, Regional Spotlight
 
     # Load CIAM parameters from file
@@ -87,17 +87,13 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
     rename!(outregionNPV,wbrgns)
 
     # Write Trials, Global NPV and Time Series
-    if runname==""
-        outtrialsname="$(outputdir)/trials.csv"
-        outnpvname="$(outputdir)/results/globalnpv.csv"
-        outrgnname="$(outputdir)/results/regionnpv.csv"
-        outtsname="$(outputdir)/results/globalts_$(rcp).csv"
-    else
-        outtrialsname="$(outputdir)/trials_$(runname).csv"
-        outnpvname="$(outputdir)/results/globalnpv_$(runname).csv"
-        outrgnname="$(outputdir)/results/regionnpv_$(runname).csv"
-        outtsname="$(outputdir)/results/globalts_$(rcp)_$(runname).csv"
-    end
+
+    isdir(postprocessing_outputdir) || mkdir(postprocessing_outputdir)
+
+    outtrialsname = joinpath(postprocessing_outputdir, "trials_$(runname).csv")
+    outnpvname= joinpath(postprocessing_outputdir, "globalnpv_$(runname).csv")
+    outrgnname = joinpath(postprocessing_outputdir, "regionnpv_$(runname).csv")
+    outtsname= joinpath(postprocessing_outputdir, "globalts_$(rcp)_$(runname).csv")
 
     CSV.write(outtrialsname, outtrials)
     procGlobalOutput(globalNPV,gmsl,ensInds,trial_params["brickfile"],rcp,adaptRegime["noRetreat"],outnpvname)
