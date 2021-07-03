@@ -18,10 +18,6 @@ Run a Monte Carlo simulation with the CIAM model over its distributional paramet
 
 function run_ciam_mcs(model, output_dir; trials=10000, ntsteps=10, save_trials=true, vary_ciam=true)
 
-    # unique output directory
-    output_dir = joinpath(output_dir, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$trials")
-    isdir(output_dir) || mkdir(output_dir)
-
     # results output directory
     results_output_dir = joinpath(output_dir, "results")
     isdir(results_output_dir) || mkdir(results_output_dir)
