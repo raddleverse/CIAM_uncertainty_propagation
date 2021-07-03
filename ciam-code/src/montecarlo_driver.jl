@@ -1,4 +1,3 @@
-using DataFrames: Highlighter
 ##==============================================================================
 ## montecarlo_driver.jl
 ##
@@ -26,27 +25,27 @@ include("processResults.jl")
 # - for each call to runTrials, a (unique) subdir created with the code:
 #   joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
 #
-# - for each of these subdirs, you will see a results folder with results directly
+# - for each of these subdirs, you will see a RawResults folder with any results directly
 #   from the monte carlo runs in run_ciam_mcs.jl and a PostProcessing folder written 
 #   with the code at the bottom of ciamMonteCarlo.jl
 #
 
 brickfile = "/Users/lisarennels/JuliaProjects/CIAMPaper/local-data/BRICK_projections.RData"
 outputdir = joinpath(@__DIR__, "..", "output", "MonteCarlo")
-isdir(outputdir) || mkdir(outputdir)
+isdir(outputdir) || mkpath(outputdir)
 
 # write the init file
 init_settings = Dict(
     :init_filename   => "MCdriver_init.csv",
     :subset          => false,
     :ssp             => "IIASAGDP_SSP5_v9_130219",
-    :ssp_simplified  => 5 # won't matter, just to get defaults for the popdens_seg_jones and _merkens arrays.
+    :ssp_simplified  => 5, # won't matter, just to get defaults for the popdens_seg_jones and _merkens arrays.
     :b => "lsl_rcp85_p50.csv" # won't matter, overwritten when doing the SLR sampling anyway
 )
 
 init_file = joinpath(outputdir,init_settings[:init_filename])
 textheader="run_name,lslr,subset,ssp,ssp_simplified\n"
-textstr = "base,$(init_settings[:b]), $(init_settings[:subset]), $(init_settings[:ssp]), $(init_settings["ssp_simplified"])"
+textstr = "base,$(init_settings[:b]),$(init_settings[:subset]),$(init_settings[:ssp]),$(init_settings[:ssp_simplified])"
 txtfile=open(init_file,"w") do io
     write(io,textheader)
     write(io,textstr)

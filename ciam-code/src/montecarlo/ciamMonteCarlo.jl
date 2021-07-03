@@ -9,19 +9,19 @@
 #
 # - a (unique) top directory created with the code:
 #   joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
-#   which will hold a results folder with results directly from the monte carlo 
+#   which will hold a RawResults folder with results directly from the monte carlo 
 #   runs in run_ciam_mcs.jl and a PostProcessing folder written with the code at 
 #   the bottom of ciamMonteCarlo.jl
 
 function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; vary_slr = true, vary_ciam=true, runname="default_run")
 
     outputdir = joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
-    isdir(outputdir) || mkdir(outputdir)
+    isdir(outputdir) || mkpath(outputdir)
     
     # Output Files: Trials, NPV, Global Time Series, Regional Spotlight
 
     # Load CIAM parameters from file
-    if trial_params[:subset] == false
+    if adaptRegime[:subset] == false
         segIDs = false
     else
         subs = MimiCIAM.load_subset(adaptRegime[:subset])
@@ -70,7 +70,7 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
     for i = 1:num_ens
         update_param!(m,:slrcost, :lslr,lslr[i,:,:])
 
-        res = run_ciam_mcs(m, outputdir; trials = trial_params[:n], ntsteps = trial_params[:t], save_trials = false, vary_ciam = vary_ciam)
+        res = run_ciam_mcs(m, outputdir; trials = trial_params[:n], ntsteps = adaptRegime[:t], save_trials = false, vary_ciam = vary_ciam)
         res1 = DataFrame([res.current_data])
 
         global outtrials = [outtrials;res1]
@@ -89,12 +89,12 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
     end
     
     # get regional NPV as DataFrame for output
-    outregionNPV = DataFrame(regionNPV)
+    outregionNPV = DataFrame(regionNPV, :auto)
     rename!(outregionNPV,wbrgns)
 
     # Write Trials, Global NPV and Time Series
     postprocessing_outputdir = joinpath(outputdir, "PostProcessing")
-    isdir(postprocessing_outputdir) || mkdir(postprocessing_outputdir)
+    isdir(postprocessing_outputdir) || mkpath(postprocessing_outputdir)
 
     outtrialsname = joinpath(postprocessing_outputdir, "trials_$(runname).csv")
     outnpvname= joinpath(postprocessing_outputdir, "globalnpv_$(runname).csv")

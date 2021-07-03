@@ -39,7 +39,7 @@ include("brickLSL.jl")
 ## Setup
 
 outputdir = joinpath(@__DIR__, "..", "output", "baseline_comparisons")
-isdir(outputdir) || mkdir(outputdir)
+isdir(outputdir) || mkpath(outputdir)
 brickfile = "/Users/lisarennels/JuliaProjects/CIAMPaper/local-data/BRICK_projections.RData"
 
 ##==============================================================================

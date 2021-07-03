@@ -3,3 +3,6 @@ output
 ciam-code/data/temporary*
 brick_download_read.ipynb
 BRICK_projections.RData
+dfC.csv
+dfN.csv
+dfO.csv"
