@@ -5,6 +5,14 @@
 ## Modified code: Tony Wong (16 May 2021)
 ##==============================================================================
 
+# The file structure created by this process will look as follows:
+#
+# - a (unique) top directory created with the code:
+#   joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
+#   which will hold a results folder with results directly from the monte carlo 
+#   runs in run_ciam_mcs.jl and a PostProcessing folder written with the code at 
+#   the bottom of ciamMonteCarlo.jl
+
 function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; vary_slr = true, vary_ciam=true, runname="default_run")
 
     outputdir = joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
@@ -85,7 +93,7 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
     rename!(outregionNPV,wbrgns)
 
     # Write Trials, Global NPV and Time Series
-
+    postprocessing_outputdir = joinpath(outputdir, "PostProcessing")
     isdir(postprocessing_outputdir) || mkdir(postprocessing_outputdir)
 
     outtrialsname = joinpath(postprocessing_outputdir, "trials_$(runname).csv")

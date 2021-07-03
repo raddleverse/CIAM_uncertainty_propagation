@@ -19,6 +19,18 @@ include("montecarlo/run_ciam_mcs.jl")
 include("brickLSL.jl")
 include("processResults.jl")
 
+# The file structure created by this process will look as follows:
+#
+# - top directory: output/MonteCarlo holding subdirectories and the init file MCdriver_init.csv
+#
+# - for each call to runTrials, a (unique) subdir created with the code:
+#   joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
+#
+# - for each of these subdirs, you will see a results folder with results directly
+#   from the monte carlo runs in run_ciam_mcs.jl and a PostProcessing folder written 
+#   with the code at the bottom of ciamMonteCarlo.jl
+#
+
 brickfile = "/Users/lisarennels/JuliaProjects/CIAMPaper/local-data/BRICK_projections.RData"
 outputdir = joinpath(@__DIR__, "..", "output", "MonteCarlo")
 isdir(outputdir) || mkdir(outputdir)
