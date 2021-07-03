@@ -9,19 +9,27 @@ using Dates
 using CSV
 
 """
-Adapted from run_fund_mcs.jl in MimiFUND.
 Run a Monte Carlo simulation with the CIAM model over its distributional parameters.
-trials: number of trials to run.
-ntsteps: number of timesteps to run
-output_dir: an output directory
-save_trials: whether to generate and save MC trial values to a file
+- trials: number of trials to run.
+- ntsteps: number of timesteps to run
+- output_dir: an output directory
+- save_trials: whether to generate and save MC trial values to a file
 """
 
-function run_ciam_mcs(model,trials=10000,ntsteps=10,output_dir=nothing, save_trials=true, vary_ciam=true)
-    output_dir = output_dir === nothing ? joinpath(@__DIR__, "../../output/ciammcs", "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$trials") : output_dir
-    mkpath("$output_dir/results")
+# The file structure created by this process will look as follows:
+#
+# - top directory output_dir containing a RawResults folder with results directly
+#   from the monte carlo runs 
+#
 
-    trials_output_filename = save_trials ?  joinpath("$output_dir/trials.csv") :  nothing
+function run_ciam_mcs(model, output_dir; trials=10000, ntsteps=10, save_trials=true, vary_ciam=true)
+
+    # results output directory
+    results_output_dir = joinpath(output_dir, "RawResults")
+    isdir(results_output_dir) || mkpath(results_output_dir)
+
+    # trials output file
+    trials_output_filename = save_trials ? joinpath(outputdir, "trials.csv") : nothing
 
     # Get an instance of CIAM's mcs
     mcs = getmcs(vary_ciam)
@@ -29,7 +37,7 @@ function run_ciam_mcs(model,trials=10000,ntsteps=10,output_dir=nothing, save_tri
     # run monte carlo trials
     res = run(mcs, model, trials;
         trials_output_filename = trials_output_filename,
-        ntimesteps = ntsteps, results_output_dir = "$output_dir/results")
+        ntimesteps = ntsteps, results_output_dir = results_output_dir)
 
     return res
 

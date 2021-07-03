@@ -1,6 +1,9 @@
 .ipynb_checkpoints
 .DS_Store
 output
+ciam-code/data/temporary*
 brick_download_read.ipynb
 BRICK_projections.RData
-.ipynb_checkpoints
+dfC.csv
+dfN.csv
+dfO.csv

@@ -6,7 +6,6 @@
 ##==============================================================================
 
 # Functions to process CIAM data and make plots
-#include("ciamhelper.jl") # already included in MimiCIAM package - shouldn't need, but we'll see how this goes
 
 function procGlobalOutput(glob,gmsl,inds,brickfile,rcp,noRetreat,outfile=false,tstart=2010,tend=2100)
 
@@ -27,11 +26,11 @@ function procGlobalOutput(glob,gmsl,inds,brickfile,rcp,noRetreat,outfile=false,t
         lab="No Retreat"
     end
 
-    df1 = DataFrame([npv gmsl2100])
+    df1 = DataFrame([npv gmsl2100], :auto)
     #df1[:brick]="Fast Dynamics"
     df1[!,:retreat] = fill(lab, size(df1)[1])
 
-    #df2 = DataFrame([npv_nofd gmsl_nofd])
+    #df2 = DataFrame([npv_nofd gmsl_nofd], :auto)
     #df2[:brick]="No Fast Dynamics"
     #df2[:retreat]=lab
 
@@ -121,14 +120,14 @@ function procSegResults(m,seg,lsl,inds,brickfile,rcp,noRetreat,tstart=2010,tend=
             pctl5 = [percentile(val[:,i],5) for i in 1:size(val)[2]]
             med = median(val,dims=1)'
 
-            df = DataFrame([segNames mn med sdev minval maxval pctl95 pctl5])
+            df = DataFrame([segNames mn med sdev minval maxval pctl95 pctl5], :auto)
             names!(df,[:segment,:mean,:median,:stdev,:min,:max,:pct95,:pct5])
             CSV.write("output/seg$(k)_stats_rcp$(rcp)_noRetreat$(noRetreat).csv",df)
         else
             md = [mode(val[:,i]) for i in 1:size(val)[2]]
             minval = minimum(val,dims=1)'
             maxval = maximum(val,dims=1)'
-            df = DataFrame([segNames md minval maxval])
+            df = DataFrame([segNames md minval maxval], :auto)
             names!(df,[:segment,:modalOption,:minOpt,:maxOpt])
             CSV.write("output/segAdapt_stats_rcp$(rcp)_noRetreat$(noRetreat)_$(k).csv",df)
         end
