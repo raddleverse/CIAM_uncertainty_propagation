@@ -9,15 +9,15 @@
 #
 # - a (unique) top directory created with the code:
 #   joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
-#   which will hold a RawResults folder with results directly from the monte carlo 
-#   runs in run_ciam_mcs.jl and a PostProcessing folder written with the code at 
+#   which will hold a RawResults folder with results directly from the monte carlo
+#   runs in run_ciam_mcs.jl and a PostProcessing folder written with the code at
 #   the bottom of ciamMonteCarlo.jl
 
 function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; vary_slr = true, vary_ciam=true, runname="default_run")
 
     outputdir = joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
     isdir(outputdir) || mkpath(outputdir)
-    
+
     # Output Files: Trials, NPV, Global Time Series, Regional Spotlight
 
     # Load CIAM parameters from file
@@ -31,13 +31,13 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
 
     # Load BRICK data
     lsl = brick_lsl(rcp, segIDs, trial_params[:brickfile], trial_params[:n], trial_params[:low],
-                        trial_params[:high],trial_params[:ystart], trial_params[:yend], 
+                        trial_params[:high],trial_params[:ystart], trial_params[:yend],
                         trial_params[:tstep], false)
     if vary_slr
         lslr    =lsl[1]
         gmsl    =lsl[2]
         ensInds =lsl[3] # Indices of original BRICK array
-        
+
     elseif trial_params[:low] == trial_params[:high]
         lslr = repeat(lsl[1],outer=(trial_params[:n], 1, 1))
         gmsl = repeat(lsl[2], outer = (1,trial_params[:n]))
@@ -65,12 +65,11 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
     global outts = DataFrame()
     globalNPV = zeros(num_ens)
     regionNPV = zeros(num_ens, length(wbrgns))
-    rgns=["USA"] # USA Seg IDs of interest
 
     for i = 1:num_ens
         update_param!(m,:slrcost, :lslr,lslr[i,:,:])
 
-        res = run_ciam_mcs(m, outputdir; trials = trial_params[:n], ntsteps = adaptRegime[:t], save_trials = false, vary_ciam = vary_ciam)
+        res = run_ciam_mcs(m, outputdir; trials = 1, ntsteps = adaptRegime[:t], save_trials = false, vary_ciam = vary_ciam)
         res1 = DataFrame([res.current_data])
 
         global outtrials = [outtrials;res1]
@@ -87,7 +86,7 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
             regionNPV[i,col_rgn] = sum(m[:slrcost,:NPVOptimal][idx_rgn])
         end
     end
-    
+
     # get regional NPV as DataFrame for output
     outregionNPV = DataFrame(regionNPV, :auto)
     rename!(outregionNPV,wbrgns)
