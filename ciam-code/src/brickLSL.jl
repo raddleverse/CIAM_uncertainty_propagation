@@ -18,12 +18,14 @@ using DataFrames
 """
     get_fingerprints()
 
-Retrieve BRICK fingerprints from NetCDF file - will download the file to a 
+Retrieve BRICK fingerprints from NetCDF file - will download the file to a
 folder `temporary` that will not be uploaded to github (using .gitignore)
 """
 function get_fingerprints()
-    
-    fp_file = joinpath(@__DIR__, "..", "data", "temporary", "FINGERPRINTS_SLANGEN_Bakker.nc")
+
+    fp_dir = joinpath(@__DIR__, "..", "data", "temporary")
+    isdir(fp_dir) || mkpath(fp_dir)
+    fp_file = joinpath(fp_dir, "FINGERPRINTS_SLANGEN_Bakker.nc")
     if !isfile(fp_file)
         url = "https://github.com/scrim-network/BRICK/raw/master/fingerprints/FINGERPRINTS_SLANGEN_Bakker.nc"
         download(url, fp_file)
@@ -63,7 +65,7 @@ end
 """
     get_brickGMSL_rdata(gmslfile::String, rcp::Union{String, Number})
 
-Get brick ensemble members for specified RCP from RData file and return time x ens 
+Get brick ensemble members for specified RCP from RData file and return time x ens
 arrays for brick components
 """
 function get_brickGMSL_rdata(gmslfile::String, rcp::Union{String, Number})
@@ -89,7 +91,7 @@ end
 """
     get_lonlat(segIDs)
 
-Get CIAM lonlat tuples for specified segIDs, segID order does not matter; will sort 
+Get CIAM lonlat tuples for specified segIDs, segID order does not matter; will sort
 tuples alphabetically by segment name
 """
 function get_lonlat(segIDs)
