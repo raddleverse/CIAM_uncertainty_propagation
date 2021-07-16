@@ -43,7 +43,7 @@ ssp_files = Dict(1 => "IIASAGDP_SSP1_v9_130219",
                  4 => "IIASAGDP_SSP4_v9_130219",
                  5 => "IIASAGDP_SSP5_v9_130219")
 ssp_rcp_scenarios = [(1,26), (5,85)]  # what combinations of SSP (first) and RCP (second)?
-nensemble = 10                        # how many ensemble members for the Monte Carlo?
+nensemble = 1000                      # how many ensemble members for the Monte Carlo?
 popinput = 0                          # population density input data (only 0 is supported currently)
 
 # Now, we actually do the simulations
@@ -74,8 +74,8 @@ for (ssp, rcp) in ssp_rcp_scenarios
     trial_params = Dict(
         :brickfile  => brickfile,
         :n      => nensemble,
-        :high   => 97.5,
-        :low    =>  2.5,
+        :high   => 100,
+        :low    => 0,
         :ystart => 2010,
         :yend   => 2150,
         :tstep  => 10,
@@ -93,8 +93,8 @@ for (ssp, rcp) in ssp_rcp_scenarios
     )
 
     # vary SLR and CIAM parameters
-    trial_params[:low] = 2.5
-    trial_params[:high] = 97.5
+    trial_params[:low] = 0
+    trial_params[:high] = 100
     runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varySLR_varyCIAM")
     runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=true, runname=runname)
 
@@ -105,8 +105,8 @@ for (ssp, rcp) in ssp_rcp_scenarios
     runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=true, runname=runname)
 
     # vary only BRICK parameters
-    trial_params[:low] = 2.5
-    trial_params[:high] = 97.5
+    trial_params[:low] = 0
+    trial_params[:high] = 100
     runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varySLR")
     runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=false, runname=runname)
 

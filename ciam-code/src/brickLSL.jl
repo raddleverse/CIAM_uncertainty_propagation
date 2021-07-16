@@ -126,35 +126,31 @@ function choose_ensemble_members(time, ens, n, low, high, yend, ensInds)
     if length(time)==size(ens)[1]
         end_year = findall(x -> x==yend, time)[1]
 
-        val_low = percentile(ens[end_year,:],low)
-        val_high = percentile(ens[end_year,:],high)
+        # want to ignore NaNs later
+        idx_good = findall(!isnan, ens[end_year,:])
 
-        if val_low==val_high
-            # pick just the one ensemble member that fits
-            # get rid of NANs first
-            ens_inds = findall(!isnan, ens[end_year,:])
-            val_low = percentile(ens[end_year,ens_inds],low) # only need one because we know they're equal here
+        if low==high
+            # pick just the one ensemble member that fits,
+            # but get rid of NANs first
+            val_low = percentile(ens[end_year,idx_good],low) # only need one because we know they're equal here
             # then, see if there's a single member of the ensemble that has the desired percentile
-            idx_perc = findall(x -> x==val_low, ens[end_year,ens_inds]) # idx_perc is idx within ens_inds
+            idx_perc = findall(x -> x==val_low, ens[end_year,idx_good]) # idx_perc is idx within ens_inds
             if length(idx_perc) > 1
                 idx_perc=idx_perc[1] # if more than 1, just take the first one
             elseif length(idx_perc) == 0
                 # take the nearest one
-                idx_perc = findmin(broadcast(abs, ens[end_year, ens_inds] .- val_low))[2]
-                return ens_inds[idx_perc]
+                idx_perc = findmin(broadcast(abs, ens[end_year, idx_good] .- val_low))[2]
+                return idx_good[idx_perc]
             else
-                return ens_inds[idx_perc]
+                return idx_good[idx_perc]
             end
-            # now, get quantile
-
         else
             if ensInds==false
-                idx_good = findall(!isnan, ens[end_year,:])
+                # if you want to restrict to only between certain quantiles within the ensemble
                 val_low = percentile(ens[end_year,idx_good],low)
                 val_high = percentile(ens[end_year,idx_good],high)
-
+                # pick ensemble members
                 ens_inds = findall(x -> x >= val_low && x <= val_high, ens[end_year,:])
-
                 if length(ens_inds)>1
                     chosen_inds = ens_inds[sample(1:end,n,replace=false)]
                 else
