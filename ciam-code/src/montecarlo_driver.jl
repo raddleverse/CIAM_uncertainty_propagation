@@ -26,20 +26,24 @@ include("processResults.jl")
 #   joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
 #
 # - for each of these subdirs, you will see a RawResults folder with any results directly
-#   from the monte carlo runs in run_ciam_mcs.jl and a PostProcessing folder written 
+#   from the monte carlo runs in run_ciam_mcs.jl and a PostProcessing folder written
 #   with the code at the bottom of ciamMonteCarlo.jl
 #
 
-brickfile = "/Users/lisarennels/JuliaProjects/CIAMPaper/local-data/BRICK_projections.RData"
+#brickfile = "/Users/lisarennels/JuliaProjects/CIAMPaper/local-data/BRICK_projections.RData"
+brickfile = "/Users/aewsma/codes/CIAM_adaptation_regimes/ciam-code/data/lslr/BRICK_projections.RData"
 outputdir = joinpath(@__DIR__, "..", "output", "MonteCarlo")
 isdir(outputdir) || mkpath(outputdir)
+
+# SSP5-RCP8.5
 
 # write the init file
 init_settings = Dict(
     :init_filename   => "MCdriver_init.csv",
     :subset          => false,
     :ssp             => "IIASAGDP_SSP5_v9_130219",
-    :ssp_simplified  => 5, # won't matter, just to get defaults for the popdens_seg_jones and _merkens arrays.
+    :ssp_simplified  => 5,
+    :rcp             => 85,
     :b => "lsl_rcp85_p50.csv" # won't matter, overwritten when doing the SLR sampling anyway
 )
 
@@ -56,7 +60,7 @@ end
 
 trial_params = Dict(
     :brickfile  => brickfile,
-    :n      => 1000,
+    :n      => 10,
     :high   => 97.5,
     :low    =>  2.5,
     :ystart => 2010,
@@ -70,49 +74,140 @@ adaptRegime1 = Dict(
     :t              => 15,
     :noRetreat      => false,
     :allowMaintain  => false,
-    :popval         => 1,
-    :GAMSmatch      => true,
+    :popval         => 0,
+    :GAMSmatch      => false,
     :subset         => false
 )
 
 # vary SLR and CIAM parameters
 trial_params[:low] = 2.5
 trial_params[:high] = 97.5
-runname = "SSP5_BRICK85_varySLR_varyCIAM"
-runTrials(85, trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=true, runname=runname)
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varySLR_varyCIAM")
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=true, runname=runname)
 
 # vary only CIAM parameters
 trial_params[:low] = 50
 trial_params[:high] = 50
-runname = "SSP5_BRICK85_varyCIAM"
-runTrials(85, trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=true, runname=runname)
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varyCIAM")
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=true, runname=runname)
 
 # vary only BRICK parameters
 trial_params[:low] = 2.5
 trial_params[:high] = 97.5
-runname = "SSP5_BRICK85_varyBRICK"
-runTrials(85, trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=false, runname=runname)
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varySLR")
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=false, runname=runname)
 
 # only 5th percentile of SLR, with CIAM defaults
-trial_params[:low] = 5
-trial_params[:high] = 5
+prctile = 5
+trial_params[:low] = prctile
+trial_params[:high] = prctile
 trial_params[:n] = 1
-runname = "SSP5_BRICK85_p05"
-runTrials(85, trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_p",prctile)
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
 
 # only 50th percentile of SLR, with CIAM defaults
-trial_params[:low] = 50
-trial_params[:high] = 50
+prctile = 50
+trial_params[:low] = prctile
+trial_params[:high] = prctile
 trial_params[:n] = 1
-runname = "SSP5_BRICK85_p50"
-runTrials(85, trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_p",prctile)
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
 
 # only 95th percentile of SLR, with CIAM defaults
-trial_params[:low] = 95
-trial_params[:high] = 95
+prctile = 95
+trial_params[:low] = prctile
+trial_params[:high] = prctile
 trial_params[:n] = 1
-runname = "SSP5_BRICK85_p95"
-runTrials(85, trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_p",prctile)
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
+
+##==============================================================================
+
+# SSP1-RCP2.6
+
+# write the init file
+init_settings = Dict(
+    :init_filename   => "MCdriver_init.csv",
+    :subset          => false,
+    :ssp             => "IIASAGDP_SSP1_v9_130219",
+    :ssp_simplified  => 1,
+    :rcp             => 26,
+    :b => "lsl_rcp85_p50.csv" # won't matter, overwritten when doing the SLR sampling anyway
+)
+
+init_file = joinpath(outputdir,init_settings[:init_filename])
+textheader="run_name,lslr,subset,ssp,ssp_simplified\n"
+textstr = "base,$(init_settings[:b]),$(init_settings[:subset]),$(init_settings[:ssp]),$(init_settings[:ssp_simplified])"
+txtfile=open(init_file,"w") do io
+    write(io,textheader)
+    write(io,textstr)
+end
+
+# Define input trial parameters: BRICK model, number of trials (n), min and max BRICK percentile,
+# start and end year, and timestep
+
+trial_params = Dict(
+    :brickfile  => brickfile,
+    :n      => 10,
+    :high   => 97.5,
+    :low    =>  2.5,
+    :ystart => 2010,
+    :yend   => 2150,
+    :tstep  => 10,
+)
+
+# Define other eneded parameters and settings for the model
+adaptRegime1 = Dict(
+    :fixed          => true,
+    :t              => 15,
+    :noRetreat      => false,
+    :allowMaintain  => false,
+    :popval         => 0,
+    :GAMSmatch      => false,
+    :subset         => false
+)
+
+# vary SLR and CIAM parameters
+trial_params[:low] = 2.5
+trial_params[:high] = 97.5
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varySLR_varyCIAM")
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=true, runname=runname)
+
+# vary only CIAM parameters
+trial_params[:low] = 50
+trial_params[:high] = 50
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varyCIAM")
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=true, runname=runname)
+
+# vary only BRICK parameters
+trial_params[:low] = 2.5
+trial_params[:high] = 97.5
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varySLR")
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=false, runname=runname)
+
+# only 5th percentile of SLR, with CIAM defaults
+prctile = 5
+trial_params[:low] = prctile
+trial_params[:high] = prctile
+trial_params[:n] = 1
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_p",prctile)
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
+
+# only 50th percentile of SLR, with CIAM defaults
+prctile = 50
+trial_params[:low] = prctile
+trial_params[:high] = prctile
+trial_params[:n] = 1
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_p",prctile)
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
+
+# only 95th percentile of SLR, with CIAM defaults
+prctile = 95
+trial_params[:low] = prctile
+trial_params[:high] = prctile
+trial_params[:n] = 1
+runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_p",prctile)
+runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
 
 ##==============================================================================
 ## End
