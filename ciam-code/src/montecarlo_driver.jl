@@ -93,24 +93,28 @@ for (ssp, rcp) in ssp_rcp_scenarios
     )
 
     # vary SLR and CIAM parameters
+    println("... vary SLR and vary CIAM ...")
     trial_params[:low] = 0
     trial_params[:high] = 100
     runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varySLR_varyCIAM")
     runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=true, runname=runname)
 
     # vary only CIAM parameters
+    println("... vary CIAM ...")
     trial_params[:low] = 50
     trial_params[:high] = 50
     runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varyCIAM")
     runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=true, runname=runname)
 
     # vary only BRICK parameters
+    println("... vary SLR ...")
     trial_params[:low] = 0
     trial_params[:high] = 100
     runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_varySLR")
     runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=false, runname=runname)
 
     # only 5th percentile of SLR, with CIAM defaults
+    println("... 5th percentile ...")
     prctile = 5
     trial_params[:low] = prctile
     trial_params[:high] = prctile
@@ -119,6 +123,7 @@ for (ssp, rcp) in ssp_rcp_scenarios
     runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
 
     # only 50th percentile of SLR, with CIAM defaults
+    println("... 50th percentile ...")
     prctile = 50
     trial_params[:low] = prctile
     trial_params[:high] = prctile
@@ -127,6 +132,7 @@ for (ssp, rcp) in ssp_rcp_scenarios
     runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
 
     # only 95th percentile of SLR, with CIAM defaults
+    println("... 95th percentile ...")
     prctile = 95
     trial_params[:low] = prctile
     trial_params[:high] = prctile
