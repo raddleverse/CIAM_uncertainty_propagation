@@ -33,7 +33,7 @@ include("processResults.jl")
 # First, set some things up:
 
 #brickfile = "/Users/lisarennels/JuliaProjects/CIAMPaper/local-data/BRICK_projections.RData"
-brickfile = "/Users/aewsma/codes/CIAM_adaptation_regimes/ciam-code/data/lslr/BRICK_projections.RData"
+brickfile = "/Users/aewsma/codes/CIAM_uncertainty_propagation/ciam-code/data/lslr/BRICK_projections.RData"
 outputdir = joinpath(@__DIR__, "..", "output", "MonteCarlo")
 isdir(outputdir) || mkpath(outputdir)
 
