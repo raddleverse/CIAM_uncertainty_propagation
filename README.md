@@ -46,7 +46,23 @@ Then, press the `Backspace` key to return to Julia.
 
 ### Grab the large data files
 
-TODO - down the BRICK projections file
+#### Sea-level projections
+
+If you obtained this repository via Zenodo, then the large data file containing BRICK sea-level projections from [Vega-Westhoff et al. (2019)](https://doi.org/10.1029/2018EF001082) is in this repository at `ciam-code/data/lslr/BRICK_projections.RData`.
+
+If you obtained this repository via GitHub, then this large data file was not present. You can download it by running the following code from the Julia console, in the top-level directory of this project.
+
+```
+if !isfile("./ciam-code/data/lslr/BRICK_projections.RData")
+    url = "https://zenodo.org/record/3628215/files/sample_projections.RData"
+    download(url,  "./ciam-code/data/lslr/BRICK_projections.RData")
+end
+```
+#### Original CIAM GAMS outputs for benchmarking
+
+You will need a directory full of results from the original implementation of CIAM in GAMS from [Diaz (2016)](https://doi.org/10.1007/s10584-016-1675-4) in order to complete the baseline comparisons (Figure 2 in the manuscript). If you obtained this repository via Zenodo, then those files should be in `ciam-code/output/originalCIAM_gams_outputs`.
+
+If you obtained this repository via GitHub, then these instructions will later be modified to link to those files on Zenodo.
 
 ## Run the baseline MimiCIAM simulations
 
@@ -64,11 +80,17 @@ Then, before running the `baseline_comparisons.jl` script, you will need to chan
 include("baseline_comparisons.jl")
 ```
 
-By default, output files will be saved in `ciam-code/output/baseline_comparisons`.
+By default, output files will be saved in `ciam-code/output/baseline_comparisons`. Analyzing this output and generating figures/output data files is described below under **Analysis**.
 
 ## Run the Monte Carlo ensembles
 
-TODO
+To run the Monte Carlo ensembles under SSP5-RCP8.5 (main text) and SSP1-RCP2.6 (Supporting Material), change directories into the `ciam-code/src` directory of the `CIAM_uncertainty_propagation` project. Then, run the `montecarlo_driver.jl` script. It will give you an error about missing the `BRICK_projections.RData` file if you do not have it in the `ciam-code/data/lslr` directory.
+
+The script is set up to run by default ensembles of 1000 simulations, varying sea-level rise scenarios, varying CIAM socioeconomic parameters, and varying both. This is done for each of SSP5-RCP8.5 and SSP1-RCP2.6.
+
+The script will also run single simulations using the sea-level rise ensemble members that give the 5th, 50th, and 95th percentiles of global mean sea-level rise in 2150. CIAM parameters are held fixed at their default central values. The point here is to examine how the anticipated coastal adaptation costs differ between:
+* Case 1: you compute these percentiles of the sea-level rise ensemble, and assume they are representative of the same percentiles of the distribution of adaptation costs; and
+* Case 2: you compute the adaptation costs for _all_ sea-level rise ensemble members, then compute the percentiles of the distribution of adaptation costs.
 
 ## Analysis
 
