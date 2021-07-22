@@ -94,7 +94,11 @@ The script will also run single simulations using the sea-level rise ensemble me
 
 ## Analysis
 
-TODO - Jupyter notebooks, CSV output
+To run the analysis for the baseline comparisons, run through the Jupyter notebook that is at `work_baseline_comparisons/plotsAndAnalysis_baselineComparisons.ipynb`. As the notebook mentions, some of those validation steps where the MimiCIAM results are compared against the Original CIAM GAMS results will take a long time. For example, changing the MimiCIAM segments to adjust for perfect foresight (so they'll match the old GAMS results) takes about 30 hours on a desktop workstation. (In the MimiCIAM code moving forward, only a random subset of segments are checked, so it is much faster.)
+
+To run the analysis for the Monte Carlo uncertainty propagation experiments, run through the Jupyter notebooks that are at `work_uncertainty_propagation/SSP5-RCP85.ipynb` and `work_uncertainty_propagation/SSP1-RCP26.ipynb`. These are much faster and should not take more than a few minutes to run interactively.
+
+Both Jupyter notebooks will yield CSV files containing the numbers used to generate figures.
 
 ---
 
