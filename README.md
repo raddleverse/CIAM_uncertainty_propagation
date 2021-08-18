@@ -39,7 +39,7 @@ add StatsBase
 You will need to add the `MimiCIAM` model package itself as well. To do this, run the following line while still in the Julia package manager.
 
 ```
-add https://github.com/BRICK-SLR/MimiCIAM.jl.git
+add https://github.com/SLURMverse/MimiCIAM.jl.git
 ```
 
 Then, press the `Backspace` key to return to Julia.
@@ -58,6 +58,7 @@ if !isfile("./ciam-code/data/lslr/BRICK_projections.RData")
     download(url,  "./ciam-code/data/lslr/BRICK_projections.RData")
 end
 ```
+
 #### Original CIAM GAMS outputs for benchmarking
 
 You will need a directory full of results from the original implementation of CIAM in GAMS from [Diaz (2016)](https://doi.org/10.1007/s10584-016-1675-4) in order to complete the baseline comparisons (Figure 2 in the manuscript). If you obtained this repository via Zenodo, then those files should be in `ciam-code/output/originalCIAM_gams_outputs`.
@@ -102,4 +103,4 @@ Both Jupyter notebooks will yield CSV files containing the numbers used to gener
 
 ---
 
-Questions? Feedback? Tony Wong (aewsma at rit.edu)
+Questions? Feedback? Tony Wong (aewsma at rit.edu) We are also interested in helping folks use other sea-level projections with MimiCIAM. So, please also feel free to ask questions and/or open issues in the [MimiCIAM.jl](https://github.com/SLURMverse/MimiCIAM.jl) GitHub repository.
