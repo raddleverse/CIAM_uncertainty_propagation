@@ -19,11 +19,11 @@ using DataFrames
     get_fingerprints()
 
 Retrieve BRICK fingerprints from NetCDF file - will download the file to a
-folder `temporary` that will not be uploaded to github (using .gitignore)
+folder `data` directory
 """
 function get_fingerprints()
 
-    fp_dir = joinpath(@__DIR__, "..", "data", "temporary")
+    fp_dir = joinpath(@__DIR__, "..", "data")
     isdir(fp_dir) || mkpath(fp_dir)
     fp_file = joinpath(fp_dir, "FINGERPRINTS_SLANGEN_Bakker.nc")
     if !isfile(fp_file)
