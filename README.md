@@ -39,7 +39,7 @@ add StatsBase
 You will need to add the `MimiCIAM` model package itself as well. To do this, run the following line while still in the Julia package manager.
 
 ```
-add https://github.com/SLURMverse/MimiCIAM.jl.git
+add https://github.com/raddleverse/MimiCIAM.jl.git
 ```
 
 Then, press the `Backspace` key to return to Julia.
@@ -103,4 +103,4 @@ Both Jupyter notebooks will yield CSV files containing the numbers used to gener
 
 ---
 
-Questions? Feedback? Tony Wong (aewsma at rit.edu) We are also interested in helping folks use other sea-level projections with MimiCIAM. So, please also feel free to ask questions and/or open issues in the [MimiCIAM.jl](https://github.com/SLURMverse/MimiCIAM.jl) GitHub repository.
+Questions? Feedback? Tony Wong (aewsma at rit.edu) We are also interested in helping folks use other sea-level projections with MimiCIAM. So, please also feel free to ask questions and/or open issues in the [MimiCIAM.jl](https://github.com/raddleverse/MimiCIAM.jl) GitHub repository.
