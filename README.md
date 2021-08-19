@@ -12,7 +12,7 @@ Relative to Original CIAM, MimiCIAM:
 
 ### Obtain the git repository for this project
 
-First, [clone or download](https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository) the `CIAM_uncertainty_propagation` repository. Once this is on your computer, open the Julia console and set this folder as your working directory in the Julia console.
+First, [clone or download](https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository) the `CIAM_uncertainty_propagation` repository (that is, _this_ repository). Once this is on your computer, open the Julia console and set this folder as your working directory in the Julia console. You can also obtain a snapshot of this repository that includes all relevant results files and older CIAM results files from Zenodo here: https://zenodo.org/record/5218888.
 
 ### Installing required packages
 
