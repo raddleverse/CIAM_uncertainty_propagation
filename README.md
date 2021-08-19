@@ -61,22 +61,22 @@ end
 
 #### Original CIAM GAMS outputs for benchmarking
 
-You will need a directory full of results from the original implementation of CIAM in GAMS from [Diaz (2016)](https://doi.org/10.1007/s10584-016-1675-4) in order to complete the baseline comparisons (Figure 2 in the manuscript). If you obtained this repository via Zenodo, then those files should be in `ciam-code/output/originalCIAM_gams_outputs`.
+You will need a directory full of results from the original implementation of CIAM in GAMS from [Diaz (2016)](https://doi.org/10.1007/s10584-016-1675-4) in order to complete the baseline comparisons (Figure 4 in the manuscript). If you obtained this repository via Zenodo, then those files should be in `ciam-code/output/originalCIAM_gams_outputs`.
 
 If you obtained this repository via GitHub, then these instructions will later be modified to link to those files on Zenodo.
 
 ## Run the baseline MimiCIAM simulations
 
-This set of simulations corresponds to Figures 2 and 3 in the manuscript.
-* Figure 2 is based on simulations that check the MimiCIAM implementation against the Original CIAM results from the GAMS model version. This includes a version of MimiCIAM that should match the Original CIAM results (correcting for perfect decision-maker foresight for sea-level rise and the construction height decrease fix) and the new "baseline" version of MimiCIAM that uses the Original CIAM forcing data.
-* Figure 3 is based on simulations that implement updates to the GDP and population forcing (SSP scenarios), the sea-level rise forcing, and both. Each of these three cases is compared to the baseline MimiCIAM simulation from Figure 2.
+This set of simulations corresponds to Figures 4 and 5 in the manuscript.
+* Figure 4 is based on simulations that check the MimiCIAM implementation against the Original CIAM results from the GAMS model version. This includes a version of MimiCIAM that should match the Original CIAM results (correcting for perfect decision-maker foresight for sea-level rise and the construction height decrease fix) and the new "baseline" version of MimiCIAM that uses the Original CIAM forcing data.
+* Figure 5 is based on simulations that implement updates to the GDP and population forcing (SSP scenarios), the sea-level rise forcing, and both. Each of these three cases is compared to the baseline MimiCIAM simulation from Figure 4.
 
 To run these baseline comparison simulations, change directories into the `ciam-code/src` directory of the `CIAM_uncertainty_propagation` project. If you were already in the top-level `CIAM_uncertainty_propagation` directory, then you can do this in the Julia console using:
 ```
 cd("ciam-code/src")
 ```
 
-Then, before running the `baseline_comparisons.jl` script, you will need to change Line 44 where the `brickfile` is set to point to wherever you placed the BRICK sea-level projections locally on your computer. Once you have made that change, run the script either interactively or by running in the Julia console:
+Then, before running the `baseline_comparisons.jl` script, you will need to change Line 43 where the `brickfile` is set to point to wherever you placed the BRICK sea-level projections locally on your computer. Once you have made that change, run the script either interactively or by running in the Julia console:
 ```
 include("baseline_comparisons.jl")
 ```
