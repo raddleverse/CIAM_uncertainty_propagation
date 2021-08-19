@@ -63,7 +63,9 @@ end
 
 You will need a directory full of results from the original implementation of CIAM in GAMS from [Diaz (2016)](https://doi.org/10.1007/s10584-016-1675-4) in order to complete the baseline comparisons (Figure 4 in the manuscript). If you obtained this repository via Zenodo, then those files should be in `ciam-code/output/originalCIAM_gams_outputs`.
 
-If you obtained this repository via GitHub, then these instructions will later be modified to link to those files on Zenodo.
+If you obtained this repository via GitHub, then you can obtain a zipped folder full of the Original CIAM (GAMS version) results files from the Zenodo repository accompanying this work.
+* [This link provides only the Original CIAM GAMS results](https://zenodo.org/record/5218888/files/originalCIAM_gams_outputs.zip?download=1) (for baseline comparisons)
+* [This link provides the entire software repository snapshot](https://zenodo.org/record/5218888/files/CIAM_uncertainty_propagation-master.zip?download=1), including the Original CIAM GAMS results
 
 ## Run the baseline MimiCIAM simulations
 
