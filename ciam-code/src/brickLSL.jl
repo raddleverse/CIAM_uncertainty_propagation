@@ -234,7 +234,7 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
         # Take average of closest lat/lon values
         fpAIS_flat = collect(skipmissing(Iterators.flatten(fpAIS[ilon,ilat])))
         fpGSIC_flat = collect(skipmissing(Iterators.flatten(fpGSIC[ilon,ilat])))
-        fpGIS_flat = collect(skipmissing(Iterators.flatten(fpGSIC[ilon,ilat])))
+        fpGIS_flat = collect(skipmissing(Iterators.flatten(fpGIS[ilon,ilat]))) # shouldn't this be GIS?
 
         fpAIS_loc = mean(fpAIS_flat[isnan.(fpAIS_flat).==false],dims=1)[1]
         fpGSIC_loc = mean(fpGSIC_flat[isnan.(fpGSIC_flat).==false],dims=1)[1]
