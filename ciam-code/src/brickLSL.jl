@@ -276,7 +276,7 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
 
             fpAIS_flat = collect(skipmissing(Iterators.flatten(fpAIS[lonInds,latInds])))
             fpGSIC_flat = collect(skipmissing(Iterators.flatten(fpGSIC[lonInds,latInds])))
-            fpGIS_flat = collect(skipmissing(Iterators.flatten(fpGSIC[lonInds,latInds])))
+            fpGIS_flat = collect(skipmissing(Iterators.flatten(fpGIS[lonInds,latInds])))
 
             fpAIS_loc = mean(fpAIS_flat[isnan.(fpAIS_flat).==false],dims=1)[1]
             fpGSIC_loc = mean(fpGSIC_flat[isnan.(fpGSIC_flat).==false],dims=1)[1]
