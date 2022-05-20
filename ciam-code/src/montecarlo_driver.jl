@@ -34,6 +34,7 @@ include("processResults.jl")
 
 #brickfile = joinpath(@__DIR__, "..", "data", "lslr", "BRICK_projections.RData")
 brickfile = "https://zenodo.org/record/6461560/files/sneasybrick_projections_csv.zip"
+#brickfile = joinpath(@__DIR__, "..", "data", "lslr", "sneasybrick_projections_csv.zip")
 outputdir = joinpath(@__DIR__, "..", "output", "MonteCarlo")
 isdir(outputdir) || mkpath(outputdir)
 

@@ -97,35 +97,30 @@ and return time x ens arrays for brick components
 """
 function get_brickGMSL_zip(gmslfile::String, rcp::Union{String, Number})
 
-    #TODO: add functionality to read locally. For now, avoid downloading.
-    #url = "https://zenodo.org/record/3628215/files/sample_projections.RData"
-    #download(url, gmslfile)
-    dat = HTTP.get(gmslfile)
-    r = ZipFile.Reader(IOBuffer(dat.body))
-    filenames = [r.files[k].name for k in 1:length(r.files)]
-    filename_AIS = "projections_csv/RCP$(rcp)/projections_antarctic_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
-    filename_GSIC = "projections_csv/RCP$(rcp)/projections_glaciers_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
-    filename_GIS = "projections_csv/RCP$(rcp)/projections_greenland_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
-    filename_TE = "projections_csv/RCP$(rcp)/projections_thermal_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
-    filename_GMSL = "projections_csv/RCP$(rcp)/projections_gmsl_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
-    filename_LWS = "projections_csv/RCP$(rcp)/projections_landwater_storage_sl_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
-    filename_MAP = "projections_csv/RCP$(rcp)/projections_MAP_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
+    results_dir = joinpath(@__DIR__, "..", "data", "lslr")#TODO HERE NOW!!
+    filepath_AIS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_antarctic_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
+    filepath_GSIC = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_glaciers_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
+    filepath_GIS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_greenland_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
+    filepath_TE = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_thermal_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
+    filepath_GMSL = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_gmsl_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
+    filepath_LWS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_landwater_storage_sl_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
+    filepath_MAP = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_MAP_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
 
-    idx_AIS = findall(x -> x == filename_AIS, filenames)
-    idx_GSIC = findall(x -> x == filename_GSIC, filenames)
-    idx_GIS = findall(x -> x == filename_GIS, filenames)
-    idx_TE = findall(x -> x == filename_TE, filenames)
-    idx_GMSL = findall(x -> x == filename_GMSL, filenames)
-    idx_LWS = findall(x -> x == filename_LWS, filenames)
-    idx_MAP = findall(x -> x == filename_MAP, filenames)
+    if !isfile(filepath_AIS) | !isfile(filepath_GSIC) | !isfile(filepath_GIS) |
+       !isfile(filepath_TE) | !isfile(filepath_GMSL) | !isfile(filepath_LWS) |
+       !isfile(filepath_MAP)
+        url = "https://zenodo.org/record/6461560/files/sneasybrick_projections_csv.zip"
+        download(url, gmslfile)
+        run(pipeline(`unzip $(gmslfile) -d $(results_dir)`));
+    end
 
-    brAIS = Matrix(CSV.read(r.files[idx_AIS],DataFrame))
-    brGSIC = Matrix(CSV.read(r.files[idx_GSIC],DataFrame))
-    brGIS = Matrix(CSV.read(r.files[idx_GIS],DataFrame))
-    brTE = Matrix(CSV.read(r.files[idx_TE],DataFrame))
-    brGMSL = Matrix(CSV.read(r.files[idx_GMSL],DataFrame))
-    brLWS = Matrix(CSV.read(r.files[idx_LWS],DataFrame))
-    brMAP = CSV.read(r.files[idx_MAP],DataFrame)
+    brAIS = Matrix(CSV.read(filepath_AIS,DataFrame))
+    brGSIC = Matrix(CSV.read(filepath_GSIC,DataFrame))
+    brGIS = Matrix(CSV.read(filepath_GIS,DataFrame))
+    brTE = Matrix(CSV.read(filepath_TE,DataFrame))
+    brGMSL = Matrix(CSV.read(filepath_GMSL,DataFrame))
+    brLWS = Matrix(CSV.read(filepath_LWS,DataFrame))
+    brMAP = CSV.read(filepath_MAP,DataFrame)
     btime = brMAP[!,:YEAR]
 
     return btime, brAIS, brGSIC, brGIS, brTE, brLWS, brGMSL
