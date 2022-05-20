@@ -8,7 +8,8 @@
 using Query
 using CSV
 using NetCDF
-using RData
+using HTTP
+using ZipFile
 using StatsBase
 using DataFrames
 
@@ -83,6 +84,49 @@ function get_brickGMSL_rdata(gmslfile::String, rcp::Union{String, Number})
     brGMSL = brick["slr.rcp$(rcp)"]
     brLWS = brGMSL - (brAIS + brGSIC + brGIS + brTE) # LWS not explicitly stored on this file, but it balances the GMSL
     btime = brick["proj.time"]
+
+    return btime, brAIS, brGSIC, brGIS, brTE, brLWS, brGMSL
+
+end
+
+"""
+    get_brickGMSL_zip(gmslfile::String, local::rcp::Union{String, Number})
+
+Get brick ensemble members for specified RCP from zip file URL or local path,
+and return time x ens arrays for brick components
+"""
+function get_brickGMSL_zip(gmslfile::String, rcp::Union{String, Number})
+
+    #TODO: add functionality to read locally. For now, avoid downloading.
+    #url = "https://zenodo.org/record/3628215/files/sample_projections.RData"
+    #download(url, gmslfile)
+    dat = HTTP.get(gmslfile)
+    r = ZipFile.Reader(IOBuffer(dat.body))
+    filenames = [r.files[k].name for k in 1:length(r.files)]
+    filename_AIS = "projections_csv/RCP$(rcp)/projections_antarctic_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
+    filename_GSIC = "projections_csv/RCP$(rcp)/projections_glaciers_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
+    filename_GIS = "projections_csv/RCP$(rcp)/projections_greenland_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
+    filename_TE = "projections_csv/RCP$(rcp)/projections_thermal_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
+    filename_GMSL = "projections_csv/RCP$(rcp)/projections_gmsl_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
+    filename_LWS = "projections_csv/RCP$(rcp)/projections_landwater_storage_sl_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
+    filename_MAP = "projections_csv/RCP$(rcp)/projections_MAP_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv"
+
+    idx_AIS = findall(x -> x == filename_AIS, filenames)
+    idx_GSIC = findall(x -> x == filename_GSIC, filenames)
+    idx_GIS = findall(x -> x == filename_GIS, filenames)
+    idx_TE = findall(x -> x == filename_TE, filenames)
+    idx_GMSL = findall(x -> x == filename_GMSL, filenames)
+    idx_LWS = findall(x -> x == filename_LWS, filenames)
+    idx_MAP = findall(x -> x == filename_MAP, filenames)
+
+    brAIS = Matrix(CSV.read(r.files[idx_AIS],DataFrame))
+    brGSIC = Matrix(CSV.read(r.files[idx_GSIC],DataFrame))
+    brGIS = Matrix(CSV.read(r.files[idx_GIS],DataFrame))
+    brTE = Matrix(CSV.read(r.files[idx_TE],DataFrame))
+    brGMSL = Matrix(CSV.read(r.files[idx_GMSL],DataFrame))
+    brLWS = Matrix(CSV.read(r.files[idx_LWS],DataFrame))
+    brMAP = CSV.read(r.files[idx_MAP],DataFrame)
+    btime = brMAP[!,:YEAR]
 
     return btime, brAIS, brGSIC, brGIS, brTE, brLWS, brGMSL
 
@@ -179,15 +223,17 @@ Output:
 lsl_out: ens x time x segment array of local sea levels, sorted in alphabetical order by segment name
 GMSL: global mean sea levels corresponding to local sea level arrays (time x ens)
 """
-function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tstep=10)
+function downscale_brick(brickcomps, lonlat, ensInds, ystart=2010, yend=2100, tstep=10)
     # To do - check with vectors of lat, lon
     (fplat,fplon,fpAIS,fpGSIC,fpGIS) = get_fingerprints()
     (btime,AIS,GSIC,GIS,TE,LWS,GMSL) = brickcomps
 
     # Select indices of time of interest, with respect to timestep
-    tinds = findall( x -> x .>= ystart && x .<=yend, btime)
+    tinds = findall(x -> x .>= ystart && x .<=yend, btime)
     years = collect(ystart:yend)
     yinds = findall(x -> x % tstep==0, years)
+    # Need to normalize LSL relative to 2000
+    inorm = findall(x -> x==2000, btime)
 
     tdim=length(btime)
 
@@ -205,9 +251,17 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
 
     # Trim component vectors to timesteps and ensembles. Assume interval is 1 year
     if tdim==size(AIS)[1] # check that time dimension is 1
+        # for normalizing
+        AIS_norm = AIS[inorm,ensInds]
+        GSIC_norm = GSIC[inorm,ensInds]
+        GIS_norm = GIS[inorm,ensInds]
+        TE_norm = TE[inorm,ensInds]
+        LWS_norm = LWS[inorm,ensInds]
+        GMSL_norm = GMSL[inorm,ensInds]
+        # actual projections
         AIS = AIS[tinds,ensInds]
         GSIC = GSIC[tinds,ensInds]
-        GIS=GIS[tinds,ensInds]
+        GIS = GIS[tinds,ensInds]
         TE = TE[tinds,ensInds]
         LWS = LWS[tinds,ensInds]
         GMSL = GMSL[tinds,ensInds]
@@ -293,17 +347,23 @@ function downscale_brick(brickcomps,lonlat, ensInds, ystart=2010, yend=2100, tst
         end
 
        # Multiply fingerprints by BRICK ensemble members
-       # is this actually necessary?
        if ndims(AIS) > 1
             for n in 1:size(AIS)[2] # loop through ensemble members
                 lsl_out[n, :, f] = fpGIS_loc * GIS[:,n] + fpAIS_loc * AIS[:,n] + fpGSIC_loc * GSIC[:,n] +
-                    fpTE_loc * TE[:,n] + fpLWS_loc * LWS[:,n]
+                                   fpTE_loc * TE[:,n] + fpLWS_loc * LWS[:,n]
+                # CIAM - LSL should be sea-level change relative to year 2000
+                lsl_norm = fpGIS_loc * GIS_norm[n] + fpAIS_loc * AIS_norm[n] + fpGSIC_loc * GSIC_norm[n] +
+                           fpTE_loc * TE_norm[n] + fpLWS_loc * LWS_norm[n]
+                lsl_out[n, :, f] = lsl_out[n, :, f] .- lsl_norm
             end
         else
             lsl_out[1, :, f] = fpGIS_loc * GIS[:] + fpAIS_loc * AIS[:] + fpGSIC_loc * GSIC[:] +
                 fpTE_loc * TE[:] + fpLWS_loc * LWS[:]
+            # CIAM - LSL should be sea-level change relative to year 2000
+            lsl_norm = fpGIS_loc * GIS_norm + fpAIS_loc * AIS_norm + fpGSIC_loc * GSIC_norm +
+                       fpTE_loc * TE_norm + fpLWS_loc * LWS_norm
+            lsl_out[1, :, f] = lsl_out[1, :, f] .- lsl_norm
         end
-
 
     end # End lonlat tuple
 
@@ -318,11 +378,11 @@ Driver function to downscale BRICK gmsl for specified segments
 function brick_lsl(rcp,segIDs,brickfile,n,low=5,high=95,ystart=2010,yend=2100,tstep=10,ensInds=false)
     # HERE - if you want to use a different set of SLR projections, or projections
     # that are stored in a different format, a new get_brickGMSL_xxx might be needed
-    brickGMSL = get_brickGMSL_rdata(brickfile,rcp)
+    #brickGMSL = get_brickGMSL_rdata(brickfile,rcp)
+    brickGMSL = get_brickGMSL_zip(brickfile, rcp)
     brickEnsInds = choose_ensemble_members(brickGMSL[1],brickGMSL[7],n,low,high,yend,ensInds)
     lonlat = get_lonlat(segIDs)
-
-    (lsl,gmsl) = downscale_brick(brickGMSL, lonlat, brickEnsInds,ystart,yend,tstep)
+    (lsl,gmsl) = downscale_brick(brickGMSL, lonlat, brickEnsInds, ystart, yend, tstep)
 
     return lsl,gmsl,brickEnsInds
 end

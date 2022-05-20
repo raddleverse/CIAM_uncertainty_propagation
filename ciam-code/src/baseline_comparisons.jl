@@ -40,7 +40,9 @@ include("brickLSL.jl")
 
 outputdir = joinpath(@__DIR__, "..", "output", "baseline_comparisons")
 isdir(outputdir) || mkpath(outputdir)
-brickfile = joinpath(@__DIR__, "..", "data", "lslr", "BRICK_projections.RData")
+#brickfile = joinpath(@__DIR__, "..", "data", "lslr", "BRICK_projections.RData")
+# projections are 1850-2300:
+brickfile = "https://zenodo.org/record/6461560/files/sneasybrick_projections_csv.zip"
 
 ##==============================================================================
 ## Helper Functions
@@ -361,6 +363,96 @@ run(m)
 MimiCIAM.write_output_files(m, outputdir, run_name)
 
 ##==============================================================================
+##  baseline+updated SLR (RCP4.5)+updated GPD/POP via SSP2 (moderate case)
+
+run_name = "ctrl+SSP2+BRICKLSL45"
+
+init_settings = Dict(
+    :init_filename   => string("$run_name", "_init.csv"),
+    :lslrfile        => "lsl_rcp85_p50.csv", # placeholder - will be overwritten with BRICK LSLR below with `update_param`
+    :subset          => false,
+    :ssp             => "IIASAGDP_SSP2_v9_130219",
+    :ssp_simplified  => "2"  #SSP = "IIASAGDP_SSP5_v9_130219"
+)
+
+model_settings = Dict(
+    :fixed          => true,
+    :t              => 15,
+    :noRetreat      => false,
+    :allowMaintain  => false,
+    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
+    :GAMSmatch      => false
+)
+
+MimiCIAM.write_init_file(run_name, outputdir, init_settings)
+
+m = MimiCIAM.get_model(
+    initfile        = joinpath(outputdir, init_settings[:init_filename]),
+    fixed           = model_settings[:fixed],
+    t               = model_settings[:t],
+    noRetreat       = model_settings[:noRetreat],
+    allowMaintain   = model_settings[:allowMaintain],
+    popinput        = model_settings[:popinput],
+    GAMSmatch       = model_settings[:GAMSmatch]
+)
+
+segIDs = get_segIDs(init_settings[:subset])
+rcp = 45
+lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
+lslr=lsl[1]
+gmsl=lsl[2]
+ensInds=lsl[3] # Indices of original BRICK array
+update_param!(m, :slrcost, :lslr, lslr[1,:,:])
+
+run(m)
+
+MimiCIAM.write_output_files(m, outputdir, run_name)
+
+##==============================================================================
+##  baseline+updated SLR (RCP6.0)+updated GPD/POP via SSP4 (moderate case)
+
+run_name = "ctrl+SSP4+BRICKLSL60"
+
+init_settings = Dict(
+    :init_filename   => string("$run_name", "_init.csv"),
+    :lslrfile        => "lsl_rcp85_p50.csv", # placeholder - will be overwritten with BRICK LSLR below with `update_param`
+    :subset          => false,
+    :ssp             => "IIASAGDP_SSP4_v9_130219",
+    :ssp_simplified  => "4"  #SSP = "IIASAGDP_SSP5_v9_130219"
+)
+
+model_settings = Dict(
+    :fixed          => true,
+    :t              => 15,
+    :noRetreat      => false,
+    :allowMaintain  => false,
+    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
+    :GAMSmatch      => false
+)
+
+MimiCIAM.write_init_file(run_name, outputdir, init_settings)
+
+m = MimiCIAM.get_model(
+    initfile        = joinpath(outputdir, init_settings[:init_filename]),
+    fixed           = model_settings[:fixed],
+    t               = model_settings[:t],
+    noRetreat       = model_settings[:noRetreat],
+    allowMaintain   = model_settings[:allowMaintain],
+    popinput        = model_settings[:popinput],
+    GAMSmatch       = model_settings[:GAMSmatch]
+)
+
+segIDs = get_segIDs(init_settings[:subset])
+rcp = 60
+lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
+lslr=lsl[1]
+gmsl=lsl[2]
+ensInds=lsl[3] # Indices of original BRICK array
+update_param!(m, :slrcost, :lslr, lslr[1,:,:])
+
+run(m)
+
+##==============================================================================
 ##  "ctrl+SSP5+BRICKLSL85_p05" same as above, but ensemble member giving
 ##  the 5th percentile of GMSL used
 
@@ -454,6 +546,9 @@ update_param!(m, :slrcost, :lslr, lslr[1,:,:])
 run(m)
 
 MimiCIAM.write_output_files(m, outputdir, run_name)
+
+##==============================================================================
+
 
 ##==============================================================================
 ## End
