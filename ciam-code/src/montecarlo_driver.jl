@@ -43,17 +43,19 @@ ssp_files = Dict(1 => "IIASAGDP_SSP1_v9_130219",
                  3 => "IIASAGDP_SSP3_v9_130219",
                  4 => "IIASAGDP_SSP4_v9_130219",
                  5 => "IIASAGDP_SSP5_v9_130219")
+popinput = 0                          # population density input data (only 0 is supported currently)
 #ssp_rcp_scenarios = [(1,26), (2,45), (4,60), (5,85)]  # what combinations of SSP (first) and RCP (second)?
 #nensemble = 1000                      # how many ensemble members for the Monte Carlo?
-TESTING:
+#surgeoptions = [0,1,2]                # which surge data sets to use (0 = original CIAM/DINAS-COAST; 1 = GTSR-corrected D-C; 2 = GTSR nearest data points)
+#TESTING:
 #ssp_rcp_scenarios = [(5,85)]  # what combinations of SSP (first) and RCP (second)?
 ssp_rcp_scenarios = [(1,26), (2,45), (4,60), (5,85)]  # what combinations of SSP (first) and RCP (second)?
 nensemble = 10                      # how many ensemble members for the Monte Carlo?
-popinput = 0                          # population density input data (only 0 is supported currently)
-surgeoptions = [0,1,2]                # which surge data sets to use (0 = original CIAM/DINAS-COAST; 1 = GTSR-corrected D-C; 2 = GTSR nearest data points)
+surgeoptions = [0,1]                # which surge data sets to use (0 = original CIAM/DINAS-COAST; 1 = GTSR-corrected D-C; 2 = GTSR nearest data points)
 
 # Now, we actually do the simulations
-#for surgeoption in surgeoptions
+for surgeoption in surgeoptions
+    println("Surge option:",surgeoption,"...")
 
     for (ssp, rcp) in ssp_rcp_scenarios
 
@@ -149,8 +151,7 @@ surgeoptions = [0,1,2]                # which surge data sets to use (0 = origin
         runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
 
     end
-
-#end
+end
 
 ##==============================================================================
 ## End
