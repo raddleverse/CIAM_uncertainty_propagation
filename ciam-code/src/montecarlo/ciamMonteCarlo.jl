@@ -51,7 +51,8 @@ function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; var
 
     m = MimiCIAM.get_model(t = adaptRegime[:t], initfile = init_filepath,
                             fixed = adaptRegime[:fixed], noRetreat = adaptRegime[:noRetreat],
-                            allowMaintain = adaptRegime[:allowMaintain], popinput = adaptRegime[:popval])
+                            allowMaintain = adaptRegime[:allowMaintain], popinput = adaptRegime[:popval],
+                            surgeoption = adaptRegime[:surgeoption])
 #    update_param!(m,:popinput,adaptRegime[:popval])
 
     # get the segments and their corresponding World Bank regions

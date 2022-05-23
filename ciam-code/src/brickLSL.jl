@@ -8,8 +8,6 @@
 using Query
 using CSV
 using NetCDF
-using HTTP
-using ZipFile
 using StatsBase
 using DataFrames
 

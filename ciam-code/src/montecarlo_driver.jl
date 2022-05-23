@@ -94,6 +94,7 @@ for (ssp, rcp) in ssp_rcp_scenarios
         :allowMaintain  => false,
         :popval         => popinput,
         :GAMSmatch      => false,
+        :surgeoption    => 0,
         :subset         => false
     )
 
