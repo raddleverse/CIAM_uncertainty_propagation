@@ -85,7 +85,8 @@ model_settings = Dict(
     :noRetreat      => false,
     :allowMaintain  => false,
     :popinput       => 0,
-    :GAMSmatch      => true
+    :GAMSmatch      => true,
+    :surgeoption    => 0
 )
 
 MimiCIAM.write_init_file(run_name, outputdir, init_settings)
@@ -97,7 +98,8 @@ m = MimiCIAM.get_model(
     noRetreat       = model_settings[:noRetreat],
     allowMaintain   = model_settings[:allowMaintain],
     popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
+    GAMSmatch       = model_settings[:GAMSmatch],
+    surgeoption     = model_settings[:surgeoption]
 )
 run(m)
 
