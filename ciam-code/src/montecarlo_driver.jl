@@ -51,7 +51,7 @@ nensemble = 1000                      # how many ensemble members for the Monte 
 #ssp_rcp_scenarios = [(5,85)]  # what combinations of SSP (first) and RCP (second)?
 #ssp_rcp_scenarios = [(1,26), (2,45), (4,60), (5,85)]  # what combinations of SSP (first) and RCP (second)?
 #nensemble = 10                      # how many ensemble members for the Monte Carlo?
-surgeoptions = [0]                # which surge data sets to use (0 = original CIAM/DINAS-COAST; 1 = GTSR-corrected D-C; 2 = GTSR nearest data points)
+surgeoptions = [2]                # which surge data sets to use (0 = original CIAM/DINAS-COAST; 1 = GTSR-corrected D-C; 2 = GTSR nearest data points)
 
 # Now, we actually do the simulations
 for surgeoption in surgeoptions
@@ -107,21 +107,21 @@ for surgeoption in surgeoptions
         trial_params[:low] = 0
         trial_params[:high] = 100
         runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_surge",surgeoption,"_varySLR_varyCIAM")
-        runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=true, runname=runname)
+        runTrials(init_settings[:rcp], init_settings[:ssp_simplified], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=true, runname=runname)
 
         # vary only CIAM parameters
         println("... vary CIAM ...")
         trial_params[:low] = 50
         trial_params[:high] = 50
         runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_surge",surgeoption,"_varyCIAM")
-        runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=true, runname=runname)
+        runTrials(init_settings[:rcp], init_settings[:ssp_simplified], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=true, runname=runname)
 
         # vary only BRICK parameters
         println("... vary SLR ...")
         trial_params[:low] = 0
         trial_params[:high] = 100
         runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_surge",surgeoption,"_varySLR")
-        runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=false, runname=runname)
+        runTrials(init_settings[:rcp], init_settings[:ssp_simplified], trial_params, adaptRegime1, outputdir, init_file, vary_slr=true, vary_ciam=false, runname=runname)
 
         # only 5th percentile of SLR, with CIAM defaults
         println("... 5th percentile ...")
@@ -130,7 +130,7 @@ for surgeoption in surgeoptions
         trial_params[:high] = prctile
         trial_params[:n] = 1
         runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_surge",surgeoption,"_p",prctile)
-        runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
+        runTrials(init_settings[:rcp], init_settings[:ssp_simplified], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
 
         # only 50th percentile of SLR, with CIAM defaults
         println("... 50th percentile ...")
@@ -139,7 +139,7 @@ for surgeoption in surgeoptions
         trial_params[:high] = prctile
         trial_params[:n] = 1
         runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_surge",surgeoption,"_p",prctile)
-        runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
+        runTrials(init_settings[:rcp], init_settings[:ssp_simplified], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
 
         # only 95th percentile of SLR, with CIAM defaults
         println("... 95th percentile ...")
@@ -148,7 +148,7 @@ for surgeoption in surgeoptions
         trial_params[:high] = prctile
         trial_params[:n] = 1
         runname = string("SSP",init_settings[:ssp_simplified],"_BRICK",init_settings[:rcp],"_surge",surgeoption,"_p",prctile)
-        runTrials(init_settings[:rcp], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
+        runTrials(init_settings[:rcp], init_settings[:ssp_simplified], trial_params, adaptRegime1, outputdir, init_file, vary_slr=false, vary_ciam=false, runname=runname)
 
     end
 end

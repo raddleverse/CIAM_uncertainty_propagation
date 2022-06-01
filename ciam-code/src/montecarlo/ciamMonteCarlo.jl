@@ -13,9 +13,16 @@
 #   runs in run_ciam_mcs.jl and a PostProcessing folder written with the code at
 #   the bottom of ciamMonteCarlo.jl
 
-function runTrials(rcp, trial_params, adaptRegime, outputdir, init_filepath; vary_slr = true, vary_ciam=true, runname="default_run")
+function runTrials(rcp, ssp, trial_params, adaptRegime, outputdir, init_filepath; vary_slr = true, vary_ciam=true, runname="default_run")
 
-    outputdir = joinpath(outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
+
+    # make an output directory for this SSP-RCP scenario
+    scenario = "SSP$(ssp)_BRICK$(rcp)"
+    scenario_outputdir = joinpath(outputdir, scenario)
+    isdir(scenario_outputdir) || mkpath(scenario_outputdir)
+
+    # within the scenario output directory, make one for this particular set of simulations
+    outputdir = joinpath(scenario_outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
     isdir(outputdir) || mkpath(outputdir)
 
     # Output Files: Trials, NPV, Global Time Series, Regional Spotlight
