@@ -1,7 +1,8 @@
 using Distributions
 
 ciam_default_mcs = @defsim begin
-    slrcost.movefactor  = TriangularDist(0.5,3,1)          # From Diaz (2016); incorporates communication with Mendelsohn and Anthoff and Tol (2014)
+    #slrcost.movefactor  = TriangularDist(0.5,3,1)          # From Diaz (2016); incorporates communication with Mendelsohn and Anthoff and Tol (2014)
+    slrcost.movefactor  = Truncated(Normal(1,1),0.5,3)       # From Diaz (2016); incorporates communication with Mendelsohn and Anthoff and Tol (2014)
     slrcost.dvbm        = Truncated(Normal(5.376,2.688),0.0,Inf) # Updated to 2010USD from FUND
     slrcost.vslel       = Truncated(Normal(0.47,0.15),0.0,Inf) # From Viscusi and Aldy (2003)
     slrcost.vslmult     = Truncated(Normal(200,100),0.0,Inf) # From FUND (originally Cline (1992))
