@@ -85,7 +85,8 @@ model_settings = Dict(
     :noRetreat      => false,
     :allowMaintain  => false,
     :popinput       => 0,
-    :GAMSmatch      => true
+    :GAMSmatch      => true,
+    :surgeoption    => 0
 )
 
 MimiCIAM.write_init_file(run_name, outputdir, init_settings)
@@ -97,7 +98,8 @@ m = MimiCIAM.get_model(
     noRetreat       = model_settings[:noRetreat],
     allowMaintain   = model_settings[:allowMaintain],
     popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
+    GAMSmatch       = model_settings[:GAMSmatch],
+    surgeoption     = model_settings[:surgeoption]
 )
 run(m)
 
@@ -122,7 +124,8 @@ model_settings = Dict(
     :noRetreat      => false,
     :allowMaintain  => false,
     :popinput       => 0,
-    :GAMSmatch      => false
+    :GAMSmatch      => false,
+    :surgeoption    => 0
 )
 
 MimiCIAM.write_init_file(run_name, outputdir, init_settings)
@@ -134,7 +137,8 @@ m = MimiCIAM.get_model(
     noRetreat       = model_settings[:noRetreat],
     allowMaintain   = model_settings[:allowMaintain],
     popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
+    GAMSmatch       = model_settings[:GAMSmatch],
+    surgeoption     = model_settings[:surgeoption]
 )
 run(m)
 
@@ -159,7 +163,8 @@ model_settings = Dict(
     :noRetreat      => false,
     :allowMaintain  => false,
     :popinput       => 0,
-    :GAMSmatch      => false
+    :GAMSmatch      => false,
+    :surgeoption    => 0
 )
 
 MimiCIAM.write_init_file(run_name, outputdir, init_settings)
@@ -171,383 +176,138 @@ m = MimiCIAM.get_model(
     noRetreat       = model_settings[:noRetreat],
     allowMaintain   = model_settings[:allowMaintain],
     popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
+    GAMSmatch       = model_settings[:GAMSmatch],
+    surgeoption     = model_settings[:surgeoption]
 )
 run(m)
 
 MimiCIAM.write_output_files(m, outputdir, run_name)
 
-##==============================================================================
-##  baseline+updated SLR RCP8.5
 
-run_name = "ctrl+BRICKLSL85"
-
-init_settings = Dict(
-    :init_filename   => string("$run_name", "_init.csv"),
-    :lslrfile        => "lsl_rcp85_p50.csv",
-    :subset          => false,
-    :ssp             => 0,
-    :ssp_simplified  => "2" # won't matter, just to get defaults for the popdens_seg_jones and _merkens arrays.
-)
-
-model_settings = Dict(
-    :fixed          => true,
-    :t              => 15,
-    :noRetreat      => false,
-    :allowMaintain  => false,
-    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
-    :GAMSmatch      => false
-)
-
-MimiCIAM.write_init_file(run_name, outputdir, init_settings)
-
-m = MimiCIAM.get_model(
-    initfile        = joinpath(outputdir, init_settings[:init_filename]),
-    fixed           = model_settings[:fixed],
-    t               = model_settings[:t],
-    noRetreat       = model_settings[:noRetreat],
-    allowMaintain   = model_settings[:allowMaintain],
-    popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
-)
-
-segIDs = get_segIDs(init_settings[:subset])
-rcp = 85
-lsl = brick_lsl(rcp, segIDs, brickfile, 1, 50, 50, 2010, 2150, 10, false) # end_year here only for picking median SLR ensemble member
-lslr = lsl[1]
-gmsl = lsl[2] # unused
-ensInds = lsl[3] # Indices of original BRICK array (unused)
-update_param!(m, :slrcost, :lslr, lslr[1,:,:])
-
-run(m)
-
-MimiCIAM.write_output_files(m, outputdir, run_name)
 
 ##==============================================================================
-##  baseline+updated SLR RCP2.6
+##  baseline+updated SLR
 
-run_name = "ctrl+BRICKLSL26"
+for rcp in [26,45,60,85]
 
-init_settings = Dict(
-    :init_filename   => string("$run_name", "_init.csv"),
-    :lslrfile        => "lsl_rcp85_p50.csv",
-    :subset          => false,
-    :ssp             => 0,
-    :ssp_simplified  => "2" # won't matter, just to get defaults for the popdens_seg_jones and _merkens arrays.
-)
+    run_name = "ctrl+BRICKLSL$(rcp)"
 
-model_settings = Dict(
-    :fixed          => true,
-    :t              => 15,
-    :noRetreat      => false,
-    :allowMaintain  => false,
-    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
-    :GAMSmatch      => false
-)
+    init_settings = Dict(
+        :init_filename   => string("$run_name", "_init.csv"),
+        :lslrfile        => "lsl_rcp85_p50.csv",
+        :subset          => false,
+        :ssp             => 0,
+        :ssp_simplified  => "2" # won't matter, just to get defaults for the popdens_seg_jones and _merkens arrays.
+    )
 
-MimiCIAM.write_init_file(run_name, outputdir, init_settings)
+    model_settings = Dict(
+        :fixed          => true,
+        :t              => 15,
+        :noRetreat      => false,
+        :allowMaintain  => false,
+        :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
+        :GAMSmatch      => false,
+        :surgeoption    => 0
+    )
 
-m = MimiCIAM.get_model(
-    initfile        = joinpath(outputdir, init_settings[:init_filename]),
-    fixed           = model_settings[:fixed],
-    t               = model_settings[:t],
-    noRetreat       = model_settings[:noRetreat],
-    allowMaintain   = model_settings[:allowMaintain],
-    popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
-)
+    MimiCIAM.write_init_file(run_name, outputdir, init_settings)
 
-segIDs = get_segIDs(init_settings[:subset])
-rcp = 26
-lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
-lslr=lsl[1]
-gmsl=lsl[2] # unused
-ensInds=lsl[3] # Indices of original BRICK array (unused)
-update_param!(m, :slrcost, :lslr, lslr[1,:,:])
+    m = MimiCIAM.get_model(
+        initfile        = joinpath(outputdir, init_settings[:init_filename]),
+        fixed           = model_settings[:fixed],
+        t               = model_settings[:t],
+        noRetreat       = model_settings[:noRetreat],
+        allowMaintain   = model_settings[:allowMaintain],
+        popinput        = model_settings[:popinput],
+        GAMSmatch       = model_settings[:GAMSmatch],
+        surgeoption     = model_settings[:surgeoption]
+    )
 
-run(m)
+    segIDs = get_segIDs(init_settings[:subset])
+    lsl = brick_lsl(rcp, segIDs, brickfile, 1, 50, 50, 2010, 2150, 10, false) # end_year here only for picking median SLR ensemble member
+    lslr = lsl[1]
+    gmsl = lsl[2] # unused
+    ensInds = lsl[3] # Indices of original BRICK array (unused)
+    update_param!(m, :slrcost, :lslr, lslr[1,:,:])
 
-MimiCIAM.write_output_files(m, outputdir, run_name)
+    run(m)
 
-##==============================================================================
-##  baseline+updated SLR (RCP8.5)+updated GPD/POP via SSP5
+    MimiCIAM.write_output_files(m, outputdir, run_name)
 
-run_name = "ctrl+SSP5+BRICKLSL85"
-
-init_settings = Dict(
-    :init_filename   => string("$run_name", "_init.csv"),
-    :lslrfile        => "lsl_rcp85_p50.csv",
-    :subset          => false,
-    :ssp             => "IIASAGDP_SSP5_v9_130219",
-    :ssp_simplified  => "5"  #SSP = "IIASAGDP_SSP5_v9_130219"
-)
-
-model_settings = Dict(
-    :fixed          => true,
-    :t              => 15,
-    :noRetreat      => false,
-    :allowMaintain  => false,
-    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
-    :GAMSmatch      => false
-)
-
-MimiCIAM.write_init_file(run_name, outputdir, init_settings)
-
-m = MimiCIAM.get_model(
-    initfile        = joinpath(outputdir, init_settings[:init_filename]),
-    fixed           = model_settings[:fixed],
-    t               = model_settings[:t],
-    noRetreat       = model_settings[:noRetreat],
-    allowMaintain   = model_settings[:allowMaintain],
-    popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
-)
-
-segIDs = get_segIDs(init_settings[:subset])
-rcp = 85
-lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
-lslr=lsl[1]
-gmsl=lsl[2]
-ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m, :slrcost, :lslr, lslr[1,:,:])
-
-run(m)
-
-MimiCIAM.write_output_files(m, outputdir, run_name)
-
-##==============================================================================
-##  baseline+updated SLR (RCP2.6)+updated GPD/POP via SSP1
-
-run_name = "ctrl+SSP1+BRICKLSL26"
-
-init_settings = Dict(
-    :init_filename   => string("$run_name", "_init.csv"),
-    :lslrfile        => "lsl_rcp85_p50.csv", # placeholder - will be overwritten with BRICK LSLR below with `update_param`
-    :subset          => false,
-    :ssp             => "IIASAGDP_SSP1_v9_130219",
-    :ssp_simplified  => "1"  #SSP = "IIASAGDP_SSP5_v9_130219"
-)
-
-model_settings = Dict(
-    :fixed          => true,
-    :t              => 15,
-    :noRetreat      => false,
-    :allowMaintain  => false,
-    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
-    :GAMSmatch      => false
-)
-
-MimiCIAM.write_init_file(run_name, outputdir, init_settings)
-
-m = MimiCIAM.get_model(
-    initfile        = joinpath(outputdir, init_settings[:init_filename]),
-    fixed           = model_settings[:fixed],
-    t               = model_settings[:t],
-    noRetreat       = model_settings[:noRetreat],
-    allowMaintain   = model_settings[:allowMaintain],
-    popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
-)
-
-segIDs = get_segIDs(init_settings[:subset])
-rcp = 26
-lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
-lslr=lsl[1]
-gmsl=lsl[2]
-ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m, :slrcost, :lslr, lslr[1,:,:])
-
-run(m)
-
-MimiCIAM.write_output_files(m, outputdir, run_name)
-
-##==============================================================================
-##  baseline+updated SLR (RCP4.5)+updated GPD/POP via SSP2 (moderate case)
-
-run_name = "ctrl+SSP2+BRICKLSL45"
-
-init_settings = Dict(
-    :init_filename   => string("$run_name", "_init.csv"),
-    :lslrfile        => "lsl_rcp85_p50.csv", # placeholder - will be overwritten with BRICK LSLR below with `update_param`
-    :subset          => false,
-    :ssp             => "IIASAGDP_SSP2_v9_130219",
-    :ssp_simplified  => "2"  #SSP = "IIASAGDP_SSP5_v9_130219"
-)
-
-model_settings = Dict(
-    :fixed          => true,
-    :t              => 15,
-    :noRetreat      => false,
-    :allowMaintain  => false,
-    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
-    :GAMSmatch      => false
-)
-
-MimiCIAM.write_init_file(run_name, outputdir, init_settings)
-
-m = MimiCIAM.get_model(
-    initfile        = joinpath(outputdir, init_settings[:init_filename]),
-    fixed           = model_settings[:fixed],
-    t               = model_settings[:t],
-    noRetreat       = model_settings[:noRetreat],
-    allowMaintain   = model_settings[:allowMaintain],
-    popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
-)
-
-segIDs = get_segIDs(init_settings[:subset])
-rcp = 45
-lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
-lslr=lsl[1]
-gmsl=lsl[2]
-ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m, :slrcost, :lslr, lslr[1,:,:])
-
-run(m)
-
-MimiCIAM.write_output_files(m, outputdir, run_name)
-
-##==============================================================================
-##  baseline+updated SLR (RCP6.0)+updated GPD/POP via SSP4 (moderate case)
-
-run_name = "ctrl+SSP4+BRICKLSL60"
-
-init_settings = Dict(
-    :init_filename   => string("$run_name", "_init.csv"),
-    :lslrfile        => "lsl_rcp85_p50.csv", # placeholder - will be overwritten with BRICK LSLR below with `update_param`
-    :subset          => false,
-    :ssp             => "IIASAGDP_SSP4_v9_130219",
-    :ssp_simplified  => "4"  #SSP = "IIASAGDP_SSP5_v9_130219"
-)
-
-model_settings = Dict(
-    :fixed          => true,
-    :t              => 15,
-    :noRetreat      => false,
-    :allowMaintain  => false,
-    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
-    :GAMSmatch      => false
-)
-
-MimiCIAM.write_init_file(run_name, outputdir, init_settings)
-
-m = MimiCIAM.get_model(
-    initfile        = joinpath(outputdir, init_settings[:init_filename]),
-    fixed           = model_settings[:fixed],
-    t               = model_settings[:t],
-    noRetreat       = model_settings[:noRetreat],
-    allowMaintain   = model_settings[:allowMaintain],
-    popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
-)
-
-segIDs = get_segIDs(init_settings[:subset])
-rcp = 60
-lsl = brick_lsl(rcp,segIDs,brickfile,1,50,50,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
-lslr=lsl[1]
-gmsl=lsl[2]
-ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m, :slrcost, :lslr, lslr[1,:,:])
-
-run(m)
-
-##==============================================================================
-##  "ctrl+SSP5+BRICKLSL85_p05" same as above, but ensemble member giving
-##  the 5th percentile of GMSL used
-
-run_name = "ctrl+SSP5+BRICKLSL85_p05"
-
-init_settings = Dict(
-    :init_filename   => string("$run_name", "_init.csv"),
-    :lslrfile        => "lsl_rcp85_p50.csv",
-    :subset          => false,
-    :ssp             => "IIASAGDP_SSP5_v9_130219",
-    :ssp_simplified  => "5"  #SSP = "IIASAGDP_SSP5_v9_130219"
-)
-
-model_settings = Dict(
-    :fixed          => true,
-    :t              => 15,
-    :noRetreat      => false,
-    :allowMaintain  => false,
-    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
-    :GAMSmatch      => false
-)
-
-MimiCIAM.write_init_file(run_name, outputdir, init_settings)
-
-m = MimiCIAM.get_model(
-    initfile        = joinpath(outputdir, init_settings[:init_filename]),
-    fixed           = model_settings[:fixed],
-    t               = model_settings[:t],
-    noRetreat       = model_settings[:noRetreat],
-    allowMaintain   = model_settings[:allowMaintain],
-    popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
-)
-
-segIDs = get_segIDs(init_settings[:subset])
-rcp = 85     # RCP scenario you want
-prctile = 5  # percentile you want
-lsl = brick_lsl(rcp,segIDs,brickfile,1,prctile,prctile,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
-lslr=lsl[1]
-gmsl=lsl[2]
-ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m, :slrcost, :lslr, lslr[1,:,:])
-
-run(m)
-
-MimiCIAM.write_output_files(m, outputdir, run_name)
-
-##==============================================================================
-##  ctrl+SSP5+BRICKLSL85_p95
-
-run_name = "ctrl+SSP5+BRICKLSL85_p95"
-
-init_settings = Dict(
-    :init_filename   => string("$run_name", "_init.csv"),
-    :lslrfile        => "lsl_rcp85_p50.csv",
-    :subset          => false,
-    :ssp             => "IIASAGDP_SSP5_v9_130219",
-    :ssp_simplified  => "5"  #SSP = "IIASAGDP_SSP5_v9_130219"
-)
-
-model_settings = Dict(
-    :fixed          => true,
-    :t              => 15,
-    :noRetreat      => false,
-    :allowMaintain  => false,
-    :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
-    :GAMSmatch      => false
-)
-
-MimiCIAM.write_init_file(run_name, outputdir, init_settings)
-
-m = MimiCIAM.get_model(
-    initfile        = joinpath(outputdir, init_settings[:init_filename]),
-    fixed           = model_settings[:fixed],
-    t               = model_settings[:t],
-    noRetreat       = model_settings[:noRetreat],
-    allowMaintain   = model_settings[:allowMaintain],
-    popinput        = model_settings[:popinput],
-    GAMSmatch       = model_settings[:GAMSmatch]
-)
-
-segIDs = get_segIDs(init_settings[:subset])
-rcp = 85     # RCP scenario you want
-prctile = 95 # percentile you want
-lsl = brick_lsl(rcp,segIDs,brickfile,1,prctile,prctile,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
-lslr=lsl[1]
-gmsl=lsl[2]
-ensInds=lsl[3] # Indices of original BRICK array
-update_param!(m, :slrcost, :lslr, lslr[1,:,:])
-
-run(m)
-
-MimiCIAM.write_output_files(m, outputdir, run_name)
+end
 
 ##==============================================================================
 
+
+
+##==============================================================================
+## Loop over the 4 baseline scenarios, percentiles, and surge options
+
+ssp_files = Dict(1 => "IIASAGDP_SSP1_v9_130219",
+                 2 => "IIASAGDP_SSP2_v9_130219",
+                 3 => "IIASAGDP_SSP3_v9_130219",
+                 4 => "IIASAGDP_SSP4_v9_130219",
+                 5 => "IIASAGDP_SSP5_v9_130219")
+ssp_rcp_scenarios = [(1,26), (2,45), (4,60), (5,85)]  # what combinations of SSP (first) and RCP (second)?
+surgeoptions = [0,1,2]                # which surge data sets to use (0 = original CIAM/DINAS-COAST; 1 = GTSR-corrected D-C; 2 = GTSR nearest data points)
+prctiles = [50,5,95]
+
+for surgeoption in surgeoptions
+    for (ssp,rcp) in ssp_rcp_scenarios
+        for prctile in prctiles
+
+            if prctile == 50
+                run_name = "ctrl+SSP$(ssp)+BRICKLSL$(rcp)+surge$(surgeoption)"
+            else
+                run_name = "ctrl+SSP$(ssp)+BRICKLSL$(rcp)+surge$(surgeoption)_p$(prctile)"
+            end
+
+            init_settings = Dict(
+                :init_filename   => string("$run_name", "_init.csv"),
+                :lslrfile        => "lsl_rcp85_p50.csv", # placeholder - will be overwritten with BRICK LSLR below with `update_param`
+                :subset          => false,
+                :ssp             => ssp_files[ssp],
+                :ssp_simplified  => ssp
+            )
+
+            model_settings = Dict(
+                :fixed          => true,
+                :t              => 15,
+                :noRetreat      => false,
+                :allowMaintain  => false,
+                :popinput       => 0, # 0 = default old stuff, 1 = Jones and O'Neill (2016), 2 = Merkens et al (2016)
+                :GAMSmatch      => false,
+                :surgeoption    => surgeoption
+            )
+
+            MimiCIAM.write_init_file(run_name, outputdir, init_settings)
+
+            m = MimiCIAM.get_model(
+                initfile        = joinpath(outputdir, init_settings[:init_filename]),
+                fixed           = model_settings[:fixed],
+                t               = model_settings[:t],
+                noRetreat       = model_settings[:noRetreat],
+                allowMaintain   = model_settings[:allowMaintain],
+                popinput        = model_settings[:popinput],
+                GAMSmatch       = model_settings[:GAMSmatch],
+                surgeoption     = model_settings[:surgeoption]
+            )
+
+            segIDs = get_segIDs(init_settings[:subset])
+            # rcp set in loop now
+            lsl = brick_lsl(rcp,segIDs,brickfile,1,prctile,prctile,2010,2150,10,false) # end_year here only for picking median SLR ensemble member
+            lslr=lsl[1]
+            gmsl=lsl[2]
+            ensInds=lsl[3] # Indices of original BRICK array
+            update_param!(m, :slrcost, :lslr, lslr[1,:,:])
+
+            run(m)
+
+            MimiCIAM.write_output_files(m, outputdir, run_name)
+
+        end
+    end
+end
 
 ##==============================================================================
 ## End
