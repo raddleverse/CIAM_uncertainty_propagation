@@ -22,7 +22,8 @@ function runTrials(rcp, ssp, trial_params, adaptRegime, outputdir, init_filepath
     isdir(scenario_outputdir) || mkpath(scenario_outputdir)
 
     # within the scenario output directory, make one for this particular set of simulations
-    outputdir = joinpath(scenario_outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
+    #outputdir = joinpath(scenario_outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
+    outputdir = joinpath(scenario_outputdir, runname, "CIAM MC$(trial_params[:n])")
     isdir(outputdir) || mkpath(outputdir)
 
     # Output Files: Trials, NPV, Global Time Series, Regional Spotlight
