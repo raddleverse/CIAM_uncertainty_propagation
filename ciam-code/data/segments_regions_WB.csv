@@ -727,14 +727,14 @@ Brazil8461,BRA,Latin America and the Caribbean
 Brazil8472,BRA,Latin America and the Caribbean
 Brazil8474,BRA,Latin America and the Caribbean
 Brazil8528,BRA,Latin America and the Caribbean
-BruneiDarussalam10382,BRA,East Asia and Pacific
-BruneiDarussalam10383,BRA,East Asia and Pacific
-BruneiDarussalam10384,BRA,East Asia and Pacific
-BruneiDarussalam10385,BRA,East Asia and Pacific
-BruneiDarussalam10386,BRA,East Asia and Pacific
-BruneiDarussalam10387,BRA,East Asia and Pacific
-BruneiDarussalam10392,BRA,East Asia and Pacific
-BruneiDarussalam10393,BRA,East Asia and Pacific
+BruneiDarussalam10382,BRN,East Asia and Pacific
+BruneiDarussalam10383,BRN,East Asia and Pacific
+BruneiDarussalam10384,BRN,East Asia and Pacific
+BruneiDarussalam10385,BRN,East Asia and Pacific
+BruneiDarussalam10386,BRN,East Asia and Pacific
+BruneiDarussalam10387,BRN,East Asia and Pacific
+BruneiDarussalam10392,BRN,East Asia and Pacific
+BruneiDarussalam10393,BRN,East Asia and Pacific
 Bulgaria555,BGR,Europe and Central Asia
 Bulgaria556,BGR,Europe and Central Asia
 Bulgaria557,BGR,Europe and Central Asia
@@ -5518,31 +5518,31 @@ Indonesia3288,IDN,East Asia and Pacific
 Indonesia3289,IDN,East Asia and Pacific
 Indonesia3290,IDN,East Asia and Pacific
 Indonesia3291,IDN,East Asia and Pacific
-IranIslamicRep1582,IDN,Middle East and North Africa
-IranIslamicRep1583,IDN,Middle East and North Africa
-IranIslamicRep1584,IDN,Middle East and North Africa
-IranIslamicRep1585,IDN,Middle East and North Africa
-IranIslamicRep1586,IDN,Middle East and North Africa
-IranIslamicRep1587,IDN,Middle East and North Africa
-IranIslamicRep1588,IDN,Middle East and North Africa
-IranIslamicRep1589,IDN,Middle East and North Africa
-IranIslamicRep1590,IDN,Middle East and North Africa
-IranIslamicRep1591,IDN,Middle East and North Africa
-IranIslamicRep1592,IDN,Middle East and North Africa
-IranIslamicRep1593,IDN,Middle East and North Africa
-IranIslamicRep1594,IDN,Middle East and North Africa
-IranIslamicRep1595,IDN,Middle East and North Africa
-IranIslamicRep1596,IDN,Middle East and North Africa
-IranIslamicRep1597,IDN,Middle East and North Africa
-IranIslamicRep1598,IDN,Middle East and North Africa
-IranIslamicRep1599,IDN,Middle East and North Africa
-IranIslamicRep1600,IDN,Middle East and North Africa
-IranIslamicRep1601,IDN,Middle East and North Africa
-IranIslamicRep1602,IDN,Middle East and North Africa
-IranIslamicRep1603,IDN,Middle East and North Africa
-IranIslamicRep1604,IDN,Middle East and North Africa
-IranIslamicRep9407,IDN,Middle East and North Africa
-IranIslamicRep9408,IDN,Middle East and North Africa
+IranIslamicRep1582,IRN,Middle East and North Africa
+IranIslamicRep1583,IRN,Middle East and North Africa
+IranIslamicRep1584,IRN,Middle East and North Africa
+IranIslamicRep1585,IRN,Middle East and North Africa
+IranIslamicRep1586,IRN,Middle East and North Africa
+IranIslamicRep1587,IRN,Middle East and North Africa
+IranIslamicRep1588,IRN,Middle East and North Africa
+IranIslamicRep1589,IRN,Middle East and North Africa
+IranIslamicRep1590,IRN,Middle East and North Africa
+IranIslamicRep1591,IRN,Middle East and North Africa
+IranIslamicRep1592,IRN,Middle East and North Africa
+IranIslamicRep1593,IRN,Middle East and North Africa
+IranIslamicRep1594,IRN,Middle East and North Africa
+IranIslamicRep1595,IRN,Middle East and North Africa
+IranIslamicRep1596,IRN,Middle East and North Africa
+IranIslamicRep1597,IRN,Middle East and North Africa
+IranIslamicRep1598,IRN,Middle East and North Africa
+IranIslamicRep1599,IRN,Middle East and North Africa
+IranIslamicRep1600,IRN,Middle East and North Africa
+IranIslamicRep1601,IRN,Middle East and North Africa
+IranIslamicRep1602,IRN,Middle East and North Africa
+IranIslamicRep1603,IRN,Middle East and North Africa
+IranIslamicRep1604,IRN,Middle East and North Africa
+IranIslamicRep9407,IRN,Middle East and North Africa
+IranIslamicRep9408,IRN,Middle East and North Africa
 Iraq1581,IRQ,Middle East and North Africa
 Ireland8488,IRL,Europe and Central Asia
 Ireland8489,IRL,Europe and Central Asia
@@ -9814,11 +9814,11 @@ SriLanka9986,LKA,South Asia
 SriLanka9987,LKA,South Asia
 SriLanka9988,LKA,South Asia
 SriLanka9989,LKA,South Asia
-St.KittsandNevis8099,LKA,Latin America and the Caribbean
-St.KittsandNevis8100,LKA,Latin America and the Caribbean
-St.Lucia8126,LKA,Latin America and the Caribbean
-St.Vincent&Grenadines8127,LKA,Latin America and the Caribbean
-St.Vincent&Grenadines8129,LKA,Latin America and the Caribbean
+St.KittsandNevis8099,KNA,Latin America and the Caribbean
+St.KittsandNevis8100,KNA,Latin America and the Caribbean
+St.Lucia8126,LCA,Latin America and the Caribbean
+St.Vincent&Grenadines8127,VCT,Latin America and the Caribbean
+St.Vincent&Grenadines8129,VCT,Latin America and the Caribbean
 St.Vincent&Grenadines8132,VCT,Latin America and the Caribbean
 Sudan1431,SDN,Sub-Saharan Africa
 Sudan1432,SDN,Sub-Saharan Africa
@@ -12061,28 +12061,28 @@ VietNam2260,VNM,East Asia and Pacific
 VietNam2261,VNM,East Asia and Pacific
 VietNam2262,VNM,East Asia and Pacific
 VietNam2263,VNM,East Asia and Pacific
-VirginIslandsU.S.8023,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8024,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8025,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8026,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8027,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8028,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8029,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8030,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8031,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8032,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8033,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8034,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8035,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8036,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8037,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8038,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8039,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8040,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8043,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8045,VNM,Latin America and the Caribbean
-VirginIslandsU.S.8064,VNM,Latin America and the Caribbean
-WestBankandGaza778,WLF,Middle East and North Africa
+VirginIslandsU.S.8023,VIR,North America
+VirginIslandsU.S.8024,VIR,North America
+VirginIslandsU.S.8025,VIR,North America
+VirginIslandsU.S.8026,VIR,North America
+VirginIslandsU.S.8027,VIR,North America
+VirginIslandsU.S.8028,VIR,North America
+VirginIslandsU.S.8029,VIR,North America
+VirginIslandsU.S.8030,VIR,North America
+VirginIslandsU.S.8031,VIR,North America
+VirginIslandsU.S.8032,VIR,North America
+VirginIslandsU.S.8033,VIR,North America
+VirginIslandsU.S.8034,VIR,North America
+VirginIslandsU.S.8035,VIR,North America
+VirginIslandsU.S.8036,VIR,North America
+VirginIslandsU.S.8037,VIR,North America
+VirginIslandsU.S.8038,VIR,North America
+VirginIslandsU.S.8039,VIR,North America
+VirginIslandsU.S.8040,VIR,North America
+VirginIslandsU.S.8043,VIR,North America
+VirginIslandsU.S.8045,VIR,North America
+VirginIslandsU.S.8064,VIR,North America
+WestBankandGaza778,PSE,Middle East and North Africa
 WesternSahara944,MAR,Middle East and North Africa
 WesternSahara945,MAR,Middle East and North Africa
 WesternSahara946,MAR,Middle East and North Africa
