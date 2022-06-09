@@ -95,7 +95,7 @@ and return time x ens arrays for brick components
 """
 function get_brickGMSL_zip(gmslfile::String, rcp::Union{String, Number})
 
-    results_dir = joinpath(@__DIR__, "..", "data", "lslr")#TODO HERE NOW!!
+    results_dir = joinpath(@__DIR__, "..", "data", "lslr")
     filepath_AIS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_antarctic_RCP$(rcp)_sneasybrick.csv")
     filepath_GSIC = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_glaciers_RCP$(rcp)_sneasybrick.csv")
     filepath_GIS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_greenland_RCP$(rcp)_sneasybrick.csv")
