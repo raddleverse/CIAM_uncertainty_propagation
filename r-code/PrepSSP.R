@@ -1,16 +1,17 @@
 ### Prep SSP Data
-# Downloaded from https://tntcat.iiasa.ac.at/SspDb/dsd?Action=htmlpage&page=60 Feb 11, 2020
+# Downloaded from https://tntcat.iiasa.ac.at/SspDb/dsd?Action=htmlpage&page=60 June 9, 2022
 # SspDb_country_data_2013-06-12.csv.zip
+# filtered for Population and GDP|PPP Variables to reduce size
 
 ## ----------Load Libraries ----------------------------------
 library(reshape2)
 library(tidyverse)
 
 ## ----------Load Data ---------------------------------------
-ciamdir <- "/Users/catherineledna/.julia/dev/MimiCIAM/"
-ciamregions <- read_csv(paste0(ciamdir,"data/input/xsc.csv")) %>% select(rgn) %>% unique()
-ciampop <- read_csv(paste0(ciamdir,"data/input/pop.csv"))
-ciamypc <- read_csv(paste0(ciamdir,"data/input/ypcc.csv"))
+workingdir <- getwd()
+ciamregions <- read_csv(paste0(workingdir,"/data_from_MimiCIAM/xsc.csv")) %>% select(rgn) %>% unique()
+ciampop <- read_csv(paste0(workingdir,"/data_from_MimiCIAM/pop.csv"))
+ciamypc <- read_csv(paste0(workingdir,"/data_from_MimiCIAM/ypcc.csv"))
 
 ciampopmelt <- ciampop %>% rename(time=variable)%>% melt(id.vars=c("time")) %>% mutate(variable=as.character(variable)) %>%
   rename(regions=variable) %>% mutate(year = 2000 + time * 10 )
@@ -18,7 +19,7 @@ ciampopmelt <- ciampop %>% rename(time=variable)%>% melt(id.vars=c("time")) %>% 
 ciamypcmelt <- ciamypc %>% rename(time=variable)%>% melt(id.vars=c("time")) %>% mutate(variable=as.character(variable)) %>%
   rename(regions=variable) %>% mutate(year = 2000 + time * 10 )
 
-ssp <- read_csv("/Users/catherineledna/Desktop/CIAMPaper2020/data/SspDb_country_data_2013-06-12.csv") %>% 
+ssp <- read_csv(paste0(workingdir, "/data_from_MimICIAM/SspDb_country_data_2013-06-12.csv")) %>% 
   melt(id.vars=c("MODEL","SCENARIO","REGION","VARIABLE","UNIT")) %>% rename(YEAR=variable) %>% mutate(YEAR=as.numeric(YEAR))
 
 col_order <- names(ciampop)
@@ -61,7 +62,7 @@ for (P in POP_MODELS){
     name<- gsub(" ","",paste0(P,"_",S))
     
     assign(x = name,spopmelt)
-    write_csv(spop,path = paste0(ciamdir,"data/ssp/pop_",name,".csv"))
+    write_csv(spop,path = paste0(workingdir,"/../ciam-code/data/ssp/pop_",name,".csv"))
   }
 }
 
@@ -101,9 +102,7 @@ for (Y in YPC_MODELS){
     name<- gsub(" ","",paste0(Y,"_",S))
     
     assign(x = name,sypcmelt)
-    write_csv(sypc,path = paste0(ciamdir,"data/ssp/ypcc_",name,".csv"))
-    write_csv(usa, path = paste0(ciamdir,"data/ssp/ypc_usa_",name,".csv"))
+    write_csv(sypc,path = paste0(workingdir,"/../ciam-code/data/ssp/ypcc_",name,".csv"))
+    write_csv(usa, path = paste0(workingdir,"/../ciam-code/data/ssp/ypc_usa_",name,".csv"))
   }
 }
-
-### Graph Results 
