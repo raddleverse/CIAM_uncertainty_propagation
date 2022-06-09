@@ -41,7 +41,7 @@ include("brickLSL.jl")
 outputdir = joinpath(@__DIR__, "..", "output", "baseline_comparisons")
 isdir(outputdir) || mkpath(outputdir)
 #brickfile = joinpath(@__DIR__, "..", "data", "lslr", "BRICK_projections.RData")
-brickfile = "https://zenodo.org/record/6461560/files/sneasybrick_projections_csv.zip"
+brickfile = "https://zenodo.org/record/6626335/files/sneasybrick_projections_csv.zip"
 
 ##==============================================================================
 ## Helper Functions

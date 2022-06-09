@@ -96,18 +96,18 @@ and return time x ens arrays for brick components
 function get_brickGMSL_zip(gmslfile::String, rcp::Union{String, Number})
 
     results_dir = joinpath(@__DIR__, "..", "data", "lslr")#TODO HERE NOW!!
-    filepath_AIS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_antarctic_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
-    filepath_GSIC = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_glaciers_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
-    filepath_GIS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_greenland_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
-    filepath_TE = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_thermal_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
-    filepath_GMSL = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_gmsl_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
-    filepath_LWS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_landwater_storage_sl_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
-    filepath_MAP = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_MAP_RCP$(rcp)_sneasybrick_20M_19-02-2022.csv")
+    filepath_AIS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_antarctic_RCP$(rcp)_sneasybrick.csv")
+    filepath_GSIC = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_glaciers_RCP$(rcp)_sneasybrick.csv")
+    filepath_GIS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_greenland_RCP$(rcp)_sneasybrick.csv")
+    filepath_TE = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_thermal_RCP$(rcp)_sneasybrick.csv")
+    filepath_GMSL = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_gmsl_RCP$(rcp)_sneasybrick.csv")
+    filepath_LWS = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_landwater_storage_sl_RCP$(rcp)_sneasybrick.csv")
+    filepath_MAP = joinpath(results_dir,"projections_csv/RCP$(rcp)/projections_MAP_RCP$(rcp)_sneasybrick.csv")
 
     if !isfile(filepath_AIS) | !isfile(filepath_GSIC) | !isfile(filepath_GIS) |
        !isfile(filepath_TE) | !isfile(filepath_GMSL) | !isfile(filepath_LWS) |
        !isfile(filepath_MAP)
-        url = "https://zenodo.org/record/6461560/files/sneasybrick_projections_csv.zip"
+        url = "https://zenodo.org/record/6626335/files/sneasybrick_projections_csv.zip"
         download(url, gmslfile)
         run(pipeline(`unzip $(gmslfile) -d $(results_dir)`));
     end
