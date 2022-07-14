@@ -22,7 +22,8 @@ function runTrials(rcp, ssp, trial_params, adaptRegime, outputdir, init_filepath
     isdir(scenario_outputdir) || mkpath(scenario_outputdir)
 
     # within the scenario output directory, make one for this particular set of simulations
-    outputdir = joinpath(scenario_outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
+    #outputdir = joinpath(scenario_outputdir, runname, "CIAM $(Dates.format(now(), "yyyy-mm-dd HH-MM-SS")) MC$(trial_params[:n])")
+    outputdir = joinpath(scenario_outputdir, runname, "CIAM MC$(trial_params[:n])")
     isdir(outputdir) || mkpath(outputdir)
 
     # Output Files: Trials, NPV, Global Time Series, Regional Spotlight
@@ -73,16 +74,16 @@ function runTrials(rcp, ssp, trial_params, adaptRegime, outputdir, init_filepath
     global outts = DataFrame()
     globalNPV = zeros(num_ens)
     regionNPV = zeros(num_ens, length(wbrgns))
+    regionNPV1 = zeros(num_ens, length(wbrgns)) # for first time step optimal costs, to subtract off later
 
     for i = 1:num_ens
         update_param!(m,:slrcost, :lslr,lslr[i,:,:])
 
         res = run_ciam_mcs(m, outputdir; trials = 1, ntsteps = adaptRegime[:t], save_trials = false, vary_ciam = vary_ciam)
         res1 = DataFrame([res.current_data])
-
         global outtrials = [outtrials;res1]
-        ts = MimiCIAM.getTimeSeries(m,i,rgns=false,sumsegs="global")
 
+        ts = MimiCIAM.getTimeSeries(m,i,rgns=false,sumsegs="global")
         global outts = [outts;ts]
         globalNPV[i] = m[:slrcost,:NPVOptimalTotal]
 
@@ -92,12 +93,17 @@ function runTrials(rcp, ssp, trial_params, adaptRegime, outputdir, init_filepath
             idx_rgn = findall(x -> x in segIDs_rgn, dfSR[!,"ids"])
             col_rgn = findfirst(x->x==rgn, wbrgns)
             regionNPV[i,col_rgn] = sum(m[:slrcost,:NPVOptimal][idx_rgn])
+            regionNPV1[i,col_rgn] = sum(m[:slrcost,:OptimalCost][1,idx_rgn]) # regional (World Bank regions) first time step optimal costs
         end
     end
 
     # get regional NPV as DataFrame for output
     outregionNPV = DataFrame(regionNPV, :auto)
     rename!(outregionNPV,wbrgns)
+
+    # regional (World Bank regions) first time step optimal costs
+    outregionNPV1 = DataFrame(regionNPV1, :auto)
+    rename!(outregionNPV1,wbrgns)
 
     # Write Trials, Global NPV and Time Series
     postprocessing_outputdir = joinpath(outputdir, "PostProcessing")
@@ -112,6 +118,10 @@ function runTrials(rcp, ssp, trial_params, adaptRegime, outputdir, init_filepath
     procGlobalOutput(globalNPV,gmsl,ensInds,trial_params[:brickfile],rcp,adaptRegime[:noRetreat],outnpvname)
     CSV.write(outtsname, outts)
     CSV.write(outrgnname, outregionNPV)
+
+    # also write out the regional (World Bank regions) first time step optimal costs
+    outrgnname1= joinpath(postprocessing_outputdir, "regionts_$(runname).csv")
+    CSV.write(outrgnname1, outregionNPV1)
 
 end
 

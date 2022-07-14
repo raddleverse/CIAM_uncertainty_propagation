@@ -19,7 +19,7 @@ Run a Monte Carlo simulation with the CIAM model over its distributional paramet
 # The file structure created by this process will look as follows:
 #
 # - top directory output_dir containing a RawResults folder with results directly
-#   from the monte carlo runs 
+#   from the monte carlo runs
 #
 
 function run_ciam_mcs(model, output_dir; trials=10000, ntsteps=10, save_trials=true, vary_ciam=true)
